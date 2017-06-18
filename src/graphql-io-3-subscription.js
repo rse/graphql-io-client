@@ -77,7 +77,7 @@ export default class Subscription {
             }`, { sid: this._.sid }).then(() => {
                 delete this._.query._.api._.subscriptions[this._.sid]
                 if (this._.unsubscribe !== null)
-                    this._.unsubscribe()
+                    this._.unsubscribe.unsubscribe()
                 this._.state = "unsubscribed"
             })
         }))
