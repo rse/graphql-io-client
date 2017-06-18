@@ -105,12 +105,12 @@ export default class Client extends EventEmitter {
 
     /*  connect to the backend endpoints  */
     async connect () {
-        this.log(1, "connect to backend")
+        this.log(2, "connect to backend")
 
         /*  create an Apollo Client network interface  */
         if (this._.options.mode === "http") {
             /*  create HTTP-based interface  */
-            this.log(2, "create HTTP-based network interface")
+            this.log(3, "create HTTP-based network interface")
             this._.networkInterface = ApolloClient.createNetworkInterface({
                 uri: `${this._.options.url}${this._.options.path.graph}`,
                 opts: {
@@ -120,7 +120,7 @@ export default class Client extends EventEmitter {
         }
         else if (this._.options.mode === "websocket") {
             /*  create WebSocket-based interface  */
-            this.log(2, "create WebSocket-based network interface")
+            this.log(3, "create WebSocket-based network interface")
             this._.networkInterface = ApolloClientWS.createNetworkInterface({
                 uri: `${this._.options.url.replace(/^http(s?):/, "ws$1:")}${this._.options.path.graph}`,
                 opts: {
@@ -132,7 +132,7 @@ export default class Client extends EventEmitter {
 
             /*  pass-though debug messages  */
             this._.networkInterface.on("debug", ({ date, level, msg, log }) => {
-                this.log(level, `[apollo-client-ws]: ${msg}`)
+                this.log(2 + level, `[apollo-client-ws]: ${msg}`)
             })
         }
         else
@@ -177,10 +177,10 @@ export default class Client extends EventEmitter {
         if (this._.options.mode === "websocket") {
             this._.networkInterface.on("receive", ({ type, data }) => {
                 if (type === "GRAPHQL-NOTIFY" && Ducky.validate(data, "[ string* ]")) {
-                    this.log(2, `received GRAPHQL-NOTIFY message for SIDs: ${data.join(", ")}`)
+                    this.log(1, `GraphQL notification for subscriptions: ${data.join(", ")}`)
                     data.forEach((sid) => {
                         if (typeof this._.subscriptions[sid] === "object") {
-                            this.log(3, `refetch query of subscription ${sid}`)
+                            this.log(2, `refetch query of subscription ${sid}`)
                             this._.subscriptions[sid].refetch()
                         }
                     })
@@ -195,7 +195,7 @@ export default class Client extends EventEmitter {
 
     /*  disconnect from the backend endpoints  */
     async disconnect () {
-        this.log(1, "disconnect from backend")
+        this.log(2, "disconnect from backend")
         if (this._.options.mode === "websocket")
             await this._.networkInterface.disconnect()
         this._.graphql          = null
@@ -211,7 +211,7 @@ export default class Client extends EventEmitter {
         this._.loginPassword = password
 
         /*  send credentials to backend  */
-        this.log(1, "login at backend")
+        this.log(2, "login at backend")
         return Axios.post(`${this._.options.url}${this._.options.path.login}`, {
             deviceId: this._.options.cid,
             username: this._.loginUsername,
@@ -234,7 +234,7 @@ export default class Client extends EventEmitter {
 
     /*  check session information  */
     session () {
-        this.log(1, "check session at backend")
+        this.log(2, "check session at backend")
         return Axios.get(`${this._.options.url}${this._.options.path.session}`).then(({ data }) => {
             return data
         }, (err) => {
@@ -245,7 +245,7 @@ export default class Client extends EventEmitter {
 
     /*  perform a logout  */
     logout () {
-        this.log(1, "logout at backend")
+        this.log(2, "logout at backend")
         return Axios.get(`${this._.options.url}${this._.options.path.logout}`).then(() => {
             this._.loginUsername = null
             this._.loginPassword = null
