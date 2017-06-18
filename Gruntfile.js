@@ -50,8 +50,8 @@ module.exports = function (grunt) {
                                 "regenerator": true
                             } ] ]
                         } ],
-                        "browserify-shim"
-                        // FIXME: [ "uglifyify", { sourceMap: false, global: true } ]
+                        "browserify-shim",
+                        [ "uglifyify", { sourceMap: false, global: true } ]
                     ],
                     plugin: [
                         [ "browserify-derequire" ],
