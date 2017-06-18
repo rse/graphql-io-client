@@ -30,8 +30,6 @@ import UUID           from "pure-uuid"
 import Ducky          from "ducky"
 import ApolloClient   from "apollo-client"
 import ApolloClientWS from "apollo-client-ws"
-import Optioner       from "optioner"
-import Joi            from "joi"
 
 /*  internal dependencies  */
 import Query          from "./graphql-io-2-query"
@@ -50,25 +48,20 @@ export default class Client extends EventEmitter {
         })
 
         /*  determine options  */
-        let optioner = Optioner({
-            url:         Joi.string().regex(/^https?:\/\/.+?:\d+\/.*$/).default("http://127.0.0.1:8080/api"),
+        this._.options = Ducky.options({
+            url:         [ "/^https?:\\/\\/.+?:\\d+\\/.*$/", "http://127.0.0.1:8080/api" ],
             path: {
-                login:   Joi.string().empty().allow("").regex(/^(?:|\/.+)$/).default("/auth/login"),
-                session: Joi.string().empty().allow("").regex(/^(?:|\/.+)$/).default("/auth/session"),
-                logout:  Joi.string().empty().allow("").regex(/^(?:|\/.+)$/).default("/auth/logout"),
-                graph:   Joi.string().empty().allow("").regex(/^(?:|\/.+)$/).default("/data/graph"),
-                blob:    Joi.string().empty().allow("").regex(/^(?:|\/.+)$/).default("/data/blob")
+                login:   [ "/^(?:|\\/.+)$/", "/auth/login" ],
+                session: [ "/^(?:|\\/.+)$/", "/auth/session" ],
+                logout:  [ "/^(?:|\\/.+)$/", "/auth/logout" ],
+                graph:   [ "/^(?:|\\/.+)$/", "/data/graph" ],
+                blob:    [ "/^(?:|\\/.+)$/", "/data/blob" ]
             },
-            cid:         Joi.string().default((new UUID(1)).format()),
-            mode:        Joi.string().regex(/^(?:http|websocket)$/).default("websocket"),
-            encoding:    Joi.string().regex(/^(?:cbor|msgpack|json)$/).default("json"),
-            debug:       Joi.number().integer().min(0).max(3).default(0)
-        })
-        optioner(options, (err, options) => {
-            if (err)
-                throw new Error(err)
-            this._.options = options
-        })
+            cid:         [ "string", (new UUID(1)).format() ],
+            mode:        [ "/^(?:http|websocket)$/", "websocket" ],
+            encoding:    [ "/^(?:cbor|msgpack|json)$/", "json" ],
+            debug:       [ "number", 0 ]
+        }, options)
 
         /*  initialize internal state  */
         this._.nsUUID           = new UUID(5, "ns:URL", "http://engelschall.com/ns/graphql-io")
@@ -88,10 +81,17 @@ export default class Client extends EventEmitter {
     latch   (...args) { return this._.latching.latch(...args) }
     unlatch (...args) { return this._.latching.unlatch(...args) }
 
+    /*  allow reconfiguration  */
+    configure (options) {
+        this._.options.merge(options)
+        return this
+    }
+
     /*  raise a fatal error  */
     error (err) {
         this.log(1, `ERROR: ${err}`)
         this.emit("error", err)
+        return this
     }
 
     /*  raise a debug message  */
@@ -101,6 +101,7 @@ export default class Client extends EventEmitter {
             let log = `${date} DEBUG [${level}]: ${msg}`
             this.emit("debug", { date, level, msg, log })
         }
+        return this
     }
 
     /*  connect to the backend endpoints  */
