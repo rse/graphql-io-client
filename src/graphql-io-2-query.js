@@ -83,7 +83,7 @@ export default class Query {
     }
 
     /*  configure one-time callback  */
-    then (onResult, onError) {
+    then (onResult, onError = (err) => { throw err }) {
         /*  just return the Promise of the underlying Apollo Client query/mutate methods  */
         let promise
         if (this._.type === "query") {
@@ -120,7 +120,7 @@ export default class Query {
     }
 
     /*  configure multiple-time callback  */
-    subscribe (onResult, onError) {
+    subscribe (onResult, onError = (err) => { throw err }) {
         /*  create a Subscription around the Apollo Client watchQuery method  */
         if (this._.type !== "subscription")
             throw new Error("you have to call \"then\" on GraphQL query/mutation operations")
