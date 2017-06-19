@@ -28,6 +28,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-browserify")
     grunt.loadNpmTasks("grunt-eslint")
     grunt.loadNpmTasks("grunt-babel")
+    grunt.loadNpmTasks("grunt-tslint")
     grunt.initConfig({
         eslint: {
             options: {
@@ -35,6 +36,14 @@ module.exports = function (grunt) {
             },
             "gruntfile": [ "Gruntfile.js" ],
             "graphql-io-client": [ "src/**/*.js" ]
+        },
+        tslint: {
+            "graphql-io-client": {
+                options: {
+                    configuration: "tslint.json"
+                },
+                src: "./src/graphql-io.d.ts"
+            }
         },
         browserify: {
             "graphql-io-client-browser": {
@@ -103,6 +112,6 @@ module.exports = function (grunt) {
             distclean: [ "node_modules" ]
         }
     })
-    grunt.registerTask("default", [ "eslint", "browserify", "babel" ])
+    grunt.registerTask("default", [ "eslint", "tslint", "browserify", "babel" ])
 }
 
