@@ -75,6 +75,23 @@ export default class Client extends EventEmitter {
         this._.latching = new Latching()
     }
 
+    /*  INTERNAL: raise a fatal error  */
+    error (err) {
+        this.log(1, `ERROR: ${err}`)
+        this.emit("error", err)
+        return this
+    }
+
+    /*  INTERNAL: raise a debug message  */
+    log (level, msg) {
+        if (level <= this._.options.debug) {
+            let date = (new Date()).toISOString()
+            let log = `${date} DEBUG [${level}]: ${msg}`
+            this.emit("debug", { date, level, msg, log })
+        }
+        return this
+    }
+
     /*  pass-through latching sub-system  */
     at (...args) {
         this._.latching.latch(...args);
@@ -88,23 +105,6 @@ export default class Client extends EventEmitter {
     /*  allow reconfiguration  */
     configure (options) {
         this._.options.merge(options)
-        return this
-    }
-
-    /*  raise a fatal error  */
-    error (err) {
-        this.log(1, `ERROR: ${err}`)
-        this.emit("error", err)
-        return this
-    }
-
-    /*  raise a debug message  */
-    log (level, msg) {
-        if (level <= this._.options.debug) {
-            let date = (new Date()).toISOString()
-            let log = `${date} DEBUG [${level}]: ${msg}`
-            this.emit("debug", { date, level, msg, log })
-        }
         return this
     }
 
@@ -196,6 +196,8 @@ export default class Client extends EventEmitter {
         /*  perform an initial connect  */
         if (this._.options.mode === "websocket")
             await this._.networkInterface.connect()
+
+        return this
     }
 
     /*  disconnect from the backend endpoints  */
@@ -205,6 +207,7 @@ export default class Client extends EventEmitter {
             await this._.networkInterface.disconnect()
         this._.graphql          = null
         this._.networkInterface = null
+        return this
     }
 
     /*  perform a login  */
@@ -237,17 +240,6 @@ export default class Client extends EventEmitter {
         })
     }
 
-    /*  check session information  */
-    session () {
-        this.log(2, "check session at backend")
-        return Axios.get(`${this._.options.url}${this._.options.path.session}`).then(({ data }) => {
-            return data
-        }, (err) => {
-            this.error(`session check failed: ${err}`)
-            return null
-        })
-    }
-
     /*  perform a logout  */
     logout () {
         this.log(2, "logout at backend")
@@ -258,6 +250,17 @@ export default class Client extends EventEmitter {
         }, (err) => {
             this.error(`logout failed: ${err}`)
             return false
+        })
+    }
+
+    /*  check session information  */
+    session () {
+        this.log(2, "check session at backend")
+        return Axios.get(`${this._.options.url}${this._.options.path.session}`).then(({ data }) => {
+            return data
+        }, (err) => {
+            this.error(`session check failed: ${err}`)
+            return null
         })
     }
 
@@ -276,33 +279,6 @@ export default class Client extends EventEmitter {
                 this.error(`${err.message}`)
         }
         return new Query(this, onError, query, vars, opts)
-    }
-
-    /*  convenience function for debugging purposes only  */
-    async gql (query, vars = {}, opts = {}) {
-        /* eslint no-console: off */
-
-        /*  perform a hard logout/login cycle  */
-        await this.logout()
-        await this.login()
-
-        /*  pass-through execution to Apollo Client  */
-        opts = Object.assign({}, opts, { fetchPolicy: "network-only" })
-        let result = this.query(query, vars, opts)
-        result.then((result) => {
-            console.log("gql: OK:", result.data)
-        }, (err) => {
-            if (   typeof err.graphQLErrors === "object"
-                && err.graphQLErrors instanceof Array   ) {
-                err.graphQLErrors.forEach((err) => {
-                    if (typeof err.path === "object" && err.path instanceof Array)
-                        console.error("gql: ERROR: path: ", err.path.join(" / ") + ":")
-                    console.error("gql: ERROR: message: ",  err.message)
-                })
-            }
-            else
-                console.error("gql: ERROR:", err)
-        })
     }
 }
 
