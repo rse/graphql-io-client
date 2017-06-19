@@ -38,6 +38,21 @@ $ npm install graphql-io-client
 Usage
 -----
 
+Simple "Hello World":
+
+```js
+const { Client } = require("graphql-io-client")
+;(async () => {
+    const sv = new Client()
+    await sv.connect()
+    let result = await sv.query("{ hello }")
+    console.log(result.data)
+    await sv.disconnect()
+})()
+```
+
+Complex Example:
+
 ```js
 /*  external requirements  */
 const { inspect } = require("util")
@@ -55,8 +70,7 @@ const dump = (data) => {
 /*  create a GraphQL-IO client service instance  */
 const newService = async (id) => {
     const sv = new Client({
-        // url:      "http://127.0.0.1:12345/api",
-        url:      "http://10.1.0.10:12345/api",
+        url:      "http://127.0.0.1:12345/api",
         path:     { graph: "" },
         encoding: "cbor",
         debug:    1

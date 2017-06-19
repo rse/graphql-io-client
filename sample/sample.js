@@ -15,8 +15,7 @@ const dump = (data) => {
 /*  create a GraphQL-IO client service instance  */
 const newService = async (id) => {
     const sv = new Client({
-        // url:      "http://127.0.0.1:12345/api",
-        url:      "http://10.1.0.10:12345/api",
+        url:      "http://127.0.0.1:12345/api",
         path:     { graph: "" },
         encoding: "cbor",
         debug:    1
