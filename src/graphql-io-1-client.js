@@ -76,9 +76,8 @@ export default class Client extends EventEmitter {
     }
 
     /*  pass-through latching sub-system  */
-    at      (...args) { return this._.latching.at(...args) }
-    latch   (...args) { return this._.latching.latch(...args) }
-    unlatch (...args) { return this._.latching.unlatch(...args) }
+    at             (...args) { return this._.latching.latch(...args) }
+    removeLatching (...args) { return this._.latching.unlatch(...args) }
 
     /*  allow reconfiguration  */
     configure (options) {
