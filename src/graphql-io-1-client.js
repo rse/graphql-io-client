@@ -64,7 +64,7 @@ export default class Client extends EventEmitter {
         }, options)
 
         /*  initialize internal state  */
-        this._.nsUUID           = new UUID(5, "ns:URL", "http://engelschall.com/ns/graphql-io")
+        this._.nsUUID           = new UUID(5, "ns:URL", "http://graphql-io.com/ns/")
         this._.loginUsername    = ""
         this._.loginPassword    = ""
         this._.graphql          = null
