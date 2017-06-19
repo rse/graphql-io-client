@@ -50,6 +50,7 @@ export default class Subscription {
                 Subscription { pause(sid: $sid) }
             }`, { sid: this._.sid }).then(() => {
                 this._.state = "paused"
+                return true
             })
         }))
     }
@@ -63,6 +64,7 @@ export default class Subscription {
                 Subscription { resume(sid: $sid) }
             }`, { sid: this._.sid }).then(() => {
                 this._.state = "subscribed"
+                return true
             })
         }))
     }
@@ -79,6 +81,7 @@ export default class Subscription {
                 if (this._.unsubscribe !== null)
                     this._.unsubscribe.unsubscribe()
                 this._.state = "unsubscribed"
+                return true
             })
         }))
     }
