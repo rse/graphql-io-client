@@ -23,7 +23,7 @@
 */
 
 /*  The GraphQL-IO Client API consists of the primary class [[Client]],
-    and its secondary interfaces [[Query]] and [[Subscription]].  */
+    and its secondary interfaces [[Query]], [[Subscription]] and [[Result]].  */
 declare module "graphql-io-client" {
     /*  The primary API class of GraphQL-IO Client,
      *  representing the network communication client.  */
