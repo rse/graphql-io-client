@@ -27,7 +27,7 @@
 declare module "graphql-io-client" {
     /*  The primary API class of GraphQL-IO Client,
      *  representing the network communication client.  */
-    class Client {
+    public class Client {
         /*  Construct a new GraphQL-IO Client instance.  */
         public constructor(options?: {
             /*  The base URL of the server.
@@ -141,25 +141,25 @@ declare module "graphql-io-client" {
         before it is actually executed.  */
     interface Query {
         /*  Once execute the query as a regular GraphQL query or mutation.  */
-        then(onResult: (result: Result) => any, onError?: (error: Error) => any): Promise<Result>
+        public then(onResult: (result: Result) => any, onError?: (error: Error) => any): Promise<Result>
 
         /*  Once execute the query as a regular GraphQL query, subscribe
             for any further changes and re-execute the query again on
             each change notification received from the server.  */
-        subscribe(onResult: (result: Result) => void, onError?: (error: Error) => void): Subscription
+        public subscribe(onResult: (result: Result) => void, onError?: (error: Error) => void): Subscription
     }
 
     /*  The secondary interface for representing a GraphQL query subscription in order
         to pause, resume and unsubscribe it.  */
     interface Subscription {
         /*  Pause the subscription at the server.  */
-        pause(): Promise<boolean>
+        public pause(): Promise<boolean>
 
         /*  Resume the subscription at the server.  */
-        resume(): Promise<boolean>
+        public resume(): Promise<boolean>
 
         /* Unsubscribe the subscription at the server.  */
-        unsubscribe(): Promise<boolean>
+        public unsubscribe(): Promise<boolean>
     }
 
     /*  The secondary interface for representing a GraphQL result object,
