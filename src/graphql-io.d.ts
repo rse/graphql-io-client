@@ -22,8 +22,8 @@
 **  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/*  The GraphQL-IO Client API consists of the primary class [[Client]],
-    and its secondary interfaces [[Query]], [[Subscription]] and [[Result]].  */
+/*  The GraphQL-IO Client API consists of the primary class Client,
+    and its secondary interfaces Query, Subscription and Result.  */
 declare module "graphql-io-client" {
     /*  The primary API class of GraphQL-IO Client,
      *  representing the network communication client.  */
@@ -104,9 +104,9 @@ declare module "graphql-io-client" {
         /*  Remove a previously registered hook latching **handler** under hook **hookName**.  */
         public removeLatching(hookName: string, handler: (...args: any[]) => any): void
 
-        /*  Merge one or more options into the [[Client]] configuration.
-            This accepts the same **options** as the [[constructor]]().
-            Should be used before any call to [[connect]]().  */
+        /*  Merge one or more options into the Client configuration.
+            This accepts the same **options** as the constructor.
+            Should be used before any call to connect().  */
         public configure(options: object): Client
 
         /*  Initiate a connection to the server.
