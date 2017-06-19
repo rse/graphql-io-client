@@ -123,6 +123,12 @@ const newService = async (id) => {
 })
 ```
 
+Application Programming Interface (API)
+---------------------------------------
+
+See the [TypeScript type definition of the GraphQL-IO-Client](src/graphql-io.d.ts)
+API for details.
+
 License
 -------
 
