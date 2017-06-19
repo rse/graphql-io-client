@@ -94,7 +94,7 @@ export default class Client extends EventEmitter {
 
     /*  pass-through latching sub-system  */
     at (...args) {
-        this._.latching.latch(...args);
+        this._.latching.latch(...args)
         return this
     }
     removeLatching (...args) {
