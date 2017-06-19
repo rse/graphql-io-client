@@ -76,7 +76,6 @@ export default class Client extends EventEmitter {
     }
 
     /*  pass-through latching sub-system  */
-    hook    (...args) { return this._.latching.hook(...args) }
     at      (...args) { return this._.latching.at(...args) }
     latch   (...args) { return this._.latching.latch(...args) }
     unlatch (...args) { return this._.latching.unlatch(...args) }
@@ -206,7 +205,7 @@ export default class Client extends EventEmitter {
     /*  perform a login  */
     async login () {
         /*  determine credentials  */
-        let { username, password } = await this.hook("login-credentials", "pass",
+        let { username, password } = await this._.latching.hook("login-credentials", "pass",
             { username: this._.loginUsername, password: this._.loginPassword })
         this._.loginUsername = username
         this._.loginPassword = password
