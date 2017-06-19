@@ -80,12 +80,10 @@ declare module "graphql-io-client" {
                 The default is `cbor`.  */
             encoding: string
 
-            /**
-             *  The debugging level.
-             *  Has to be an integer between 0 (no debugging) and 3 (maximum debugging messages).
-             *  The default is 0. The debugging messages are emitted as the event `debug`
-             *  and can be received with `client.on("debug", (msg) => { ... })`.
-             */
+            /*  The debugging level.
+                Has to be an integer between 0 (no debugging) and 3 (maximum debugging messages).
+                The default is 0. The debugging messages are emitted as the event `debug`
+                and can be received with `client.on("debug", (msg) => { ... })`.  */
             debug: number
         })
 
