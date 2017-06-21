@@ -25,7 +25,7 @@
     "dependencies": {
         "graphql-tag":                    "~2.4.0",
         "apollo-client":                  "~1.4.2",
-        "apollo-client-ws":               "~1.0.5",
+        "apollo-client-ws":               "~1.0.6",
         "axios":                          "~0.16.2",
         "pure-uuid":                      "~1.4.6",
         "ducky":                          "~2.6.0",
