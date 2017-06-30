@@ -315,7 +315,13 @@ export default class Client extends EventEmitter {
 
     /*  fetch  */
     fetch (name) {
-        /*  FIXME: BLOB fetching  */
+        this.log(2, `fetching BLOB "${name}"`)
+        return Axios.get(`${this._.options.url}${this._.options.path.blob}/${name}`).then((data) => {
+            return data
+        }, (err) => {
+            this.error(`fetchin of BLOB "${name}" failed: ${err}`)
+            return null
+        })
     }
 }
 
