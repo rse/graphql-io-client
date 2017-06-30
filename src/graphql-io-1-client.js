@@ -213,17 +213,11 @@ export default class Client extends EventEmitter {
         if (this._.options.mode === "websocket")
             await this._.networkInterface.connect()
 
-        /*  perform an initial login  */
-        await this.login(true)
-
         return this
     }
 
     /*  disconnect from the backend endpoints  */
     async disconnect () {
-        /*  perform a final logout  */
-        await this.logout(true)
-
         /*  perform a final disconnect  */
         this.log(2, "disconnect from backend")
         if (this._.options.mode === "websocket")
