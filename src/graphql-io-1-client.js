@@ -70,6 +70,7 @@ export default class Client extends EventEmitter {
         this._.graphql          = null
         this._.subscriptions    = {}
         this._.networkInterface = null
+        this._.token            = null
 
         /*  provide latching sub-system  */
         this._.latching = new Latching()
@@ -149,12 +150,24 @@ export default class Client extends EventEmitter {
                 if (   response === "object"
                     && response !== null
                     && response.status === 401) {
-                    await this.logout()
-                    await this.login()
+                    await this.logout(true)
+                    await this.login(true)
                 }
                 next()
             }
         }])
+
+        /*  hook into WebSocket creation to send authentication cookie
+            (Notice: called under Node environment only, but for Browser
+            environments this is not necessary, as Cookie is sent automatically)  */
+        this._.networkInterface.at("connect:options", (options) => {
+            if (this._.token !== null) {
+                if (!options.headers)
+                    options.headers = {}
+                options.headers.Cookie = `token=${this._.token}`
+            }
+            return options
+        })
 
         /*  provide a mapper for the unique ids of entities
             (important for Apollo Client in order to cache correcly)  */
@@ -197,34 +210,52 @@ export default class Client extends EventEmitter {
         if (this._.options.mode === "websocket")
             await this._.networkInterface.connect()
 
+        /*  perform an initial login  */
+        await this.login(true)
+
         return this
     }
 
     /*  disconnect from the backend endpoints  */
     async disconnect () {
+        /*  perform a final logout  */
+        await this.logout(true)
+
+        /*  perform a final disconnect  */
         this.log(2, "disconnect from backend")
         if (this._.options.mode === "websocket")
             await this._.networkInterface.disconnect()
+
+        /*  cleanup  */
         this._.graphql          = null
         this._.networkInterface = null
         return this
     }
 
     /*  perform a login  */
-    async login () {
+    async login (implicit = false) {
+        this.log(2, `login at backend (${implicit ? "implicitly" : "explicit"})`)
+
         /*  determine credentials  */
-        let { username, password } = await this._.latching.hook("login-credentials", "pass",
-            { username: this._.loginUsername, password: this._.loginPassword })
-        this._.loginUsername = username
-        this._.loginPassword = password
+        if (!implicit) {
+            let { username, password } = await this._.latching.hook("login-credentials", "pass",
+                { username: this._.loginUsername, password: this._.loginPassword })
+            this._.loginUsername = username
+            this._.loginPassword = password
+        }
 
         /*  send credentials to backend  */
-        this.log(2, "login at backend")
         return Axios.post(`${this._.options.url}${this._.options.path.login}`, {
             deviceId: this._.options.cid,
             username: this._.loginUsername,
             password: this._.loginPassword
-        }).then(async () => {
+        }).then(async (response) => {
+            /*  remember token  */
+            if (   typeof response === "object"
+                && typeof response.data === "object"
+                && typeof response.data.token === "string")
+                this._.token = response.data.token
+
             /*  nothing to be done here, as response contains access token
                 in a Cookie header which is used by Browser automatically
                 on any further communication  */
@@ -241,11 +272,12 @@ export default class Client extends EventEmitter {
     }
 
     /*  perform a logout  */
-    logout () {
-        this.log(2, "logout at backend")
+    logout (implicit = false) {
+        this.log(2, `logout at backend (${implicit ? "implicitly" : "explicit"})`)
         return Axios.get(`${this._.options.url}${this._.options.path.logout}`).then(() => {
             this._.loginUsername = null
             this._.loginPassword = null
+            this._.token = null
             return true
         }, (err) => {
             this.error(`logout failed: ${err}`)
@@ -279,6 +311,11 @@ export default class Client extends EventEmitter {
                 this.error(`${err.message}`)
         }
         return new Query(this, onError, query, vars, opts)
+    }
+
+    /*  fetch  */
+    fetch (name) {
+        /*  FIXME: BLOB fetching  */
     }
 }
 
