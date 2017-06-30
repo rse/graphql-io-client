@@ -49,6 +49,7 @@ export default class Client extends EventEmitter {
 
         /*  determine options  */
         this._.options = Ducky.options({
+            prefix:      [ "string", "GraphQL-IO-" ],
             url:         [ "/^https?:\\/\\/.+?:\\d+\\/.*$/", "http://127.0.0.1:8080/api" ],
             path: {
                 login:   [ "/^(?:|\\/.+)$/", "/auth/login" ],
@@ -57,7 +58,6 @@ export default class Client extends EventEmitter {
                 graph:   [ "/^(?:|\\/.+)$/", "/data/graph" ],
                 blob:    [ "/^(?:|\\/.+)$/", "/data/blob" ]
             },
-            cid:         [ "string", (new UUID(1)).format() ],
             mode:        [ "/^(?:http|websocket)$/", "websocket" ],
             encoding:    [ "/^(?:cbor|msgpack|json)$/", "json" ],
             debug:       [ "number", 0 ]
@@ -71,6 +71,7 @@ export default class Client extends EventEmitter {
         this._.subscriptions    = {}
         this._.networkInterface = null
         this._.token            = null
+        this._.peer             = null
 
         /*  provide latching sub-system  */
         this._.latching = new Latching()
@@ -157,14 +158,16 @@ export default class Client extends EventEmitter {
             }
         }])
 
-        /*  hook into WebSocket creation to send authentication cookie
+        /*  hook into WebSocket creation to send authentication cookie and peer id
             (Notice: called under Node environment only, but for Browser
             environments this is not necessary, as Cookie is sent automatically)  */
         this._.networkInterface.at("connect:options", (options) => {
-            if (this._.token !== null) {
+            if (this._.token !== null && this._.peer !== null) {
                 if (!options.headers)
                     options.headers = {}
-                options.headers.Cookie = `token=${this._.token}`
+                options.headers.Cookie =
+                    `${this._.options.prefix}Token=${this._.token}; ` +
+                    `${this._.options.prefix}Peer=${this._.peer}`
             }
             return options
         })
@@ -246,21 +249,20 @@ export default class Client extends EventEmitter {
 
         /*  send credentials to backend  */
         return Axios.post(`${this._.options.url}${this._.options.path.login}`, {
-            deviceId: this._.options.cid,
             username: this._.loginUsername,
             password: this._.loginPassword
         }).then(async (response) => {
-            /*  remember token  */
+            /*  remember token and peer (for use in non-browser environment
+                where we have to manually send them as cookies back)  */
             if (   typeof response === "object"
                 && typeof response.data === "object"
-                && typeof response.data.token === "string")
+                && typeof response.data.token === "string") {
                 this._.token = response.data.token
+                this._.peer  = response.data.peer
+            }
 
-            /*  nothing to be done here, as response contains access token
-                in a Cookie header which is used by Browser automatically
-                on any further communication  */
+            /*  for WebSocket connections, force a re-establishment  */
             if (this._.options.mode === "websocket") {
-                /*  just for WebSocket connections, force a re-establishment  */
                 await this._.networkInterface.disconnect()
                 await this._.networkInterface.connect()
             }
@@ -278,6 +280,7 @@ export default class Client extends EventEmitter {
             this._.loginUsername = null
             this._.loginPassword = null
             this._.token = null
+            this._.peer  = null
             return true
         }, (err) => {
             this.error(`logout failed: ${err}`)

@@ -63,11 +63,6 @@ declare module "graphql-io-client" {
                 blob: string
             },
 
-            /*  The unique client identifier (CID).
-                Has to be a valid UUID. It is used to uniquely identify the device in the session.
-                The default is an automatically generated UUID v1.  */
-            cid: string,
-
             /*  The communication mode for the GraphQL requests.
                 Has to be either `http` (maximum portability, no subscription support)
                 or `websocket` (maximum performace, subscription support).
