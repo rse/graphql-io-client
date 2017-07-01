@@ -16,8 +16,7 @@ const dump = (data) => {
 const newService = async (id) => {
     const sv = new Client({
         url:      "http://127.0.0.1:12345/api",
-        path:     { graph: "" },
-        encoding: "cbor",
+        encoding: "json",
         debug:    1
     })
     sv.on("debug", ({ log }) => {
