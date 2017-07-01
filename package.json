@@ -30,9 +30,7 @@
         "axios":                          "~0.16.2",
         "pure-uuid":                      "~1.4.6",
         "ducky":                          "~2.6.0",
-        "clone":                          "~2.1.1",
-        "eventemitter3":                  "~2.0.3",
-        "latching":                       "~0.9.6"
+        "clone":                          "~2.1.1"
     },
     "devDependencies": {
         "grunt":                          "~1.0.1",
