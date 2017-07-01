@@ -70,9 +70,9 @@
         "node":                           ">=6.0.0"
     },
     "scripts": {
-        "prepublish": "grunt default",
-        "build":      "grunt default",
-        "clean":      "grunt clean:clean",
-        "distclean":  "grunt clean:clean clean:distclean"
+        "build":          "grunt default",
+        "prepublishOnly": "grunt default",
+        "clean":          "grunt clean:clean",
+        "distclean":      "grunt clean:clean clean:distclean"
     }
 }
