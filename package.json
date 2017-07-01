@@ -24,7 +24,7 @@
     },
     "dependencies": {
         "graphql-tag":                    "~2.4.2",
-        "apollo-client":                  "~1.6.1",
+        "apollo-client":                  "~1.7.0",
         "apollo-client-ws":               "~1.0.7",
         "axios":                          "~0.16.2",
         "pure-uuid":                      "~1.4.6",
@@ -52,7 +52,7 @@
         "babel-preset-stage-3":           "~6.24.1",
         "babel-preset-stage-2":           "~6.24.1",
         "babel-plugin-transform-runtime": "~6.23.0",
-        "uglifyify":                      "~3.0.2",
+        "uglifyify":                      "~3.0.4",
         "browserify-header":              "~0.9.2",
         "browserify-derequire":           "~0.9.4",
         "browserify-shim":                "~3.8.14",
