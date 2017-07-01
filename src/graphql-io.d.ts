@@ -85,24 +85,20 @@ declare module "graphql-io-client" {
         /*  Listen to an event **eventName** and let the callback **handler** be asynchronously
             called for every emitted event. Known events are `debug` (handler argument:
             `info: { date: string, level: number, msg: string, log: string })`
-            and `error` (handler argument: `error: Error`).  */
-        public on(eventName: string, handler: (eventData: any) => void): void
-
-        /*  Remove a previously registered event listener **handler** under event **eventName**.  */
-        public removeListener(eventName: string, handler: (eventData: any) => void): void
+            and `error` (handler argument: `error: Error`). Returns a function to remove
+            the handler again. */
+        public on(eventName: string, handler: (eventData: any) => void): () => void
 
         /*  Latch into a hook **hookName** and let the callback **handler** be synchronously
             called for every hook processing. Known hooks are: `login-credentials` (handler argument:
-            `credentials: { username: string, password: string })`.  */
-        public at(hookName: string, handler: (...args: any[]) => any): void
-
-        /*  Remove a previously registered hook latching **handler** under hook **hookName**.  */
-        public removeLatching(hookName: string, handler: (...args: any[]) => any): void
+            `credentials: { username: string, password: string })`. Returns a function
+            to remove the handler again. */
+        public at(hookName: string, handler: (...args: any[]) => any): () => void
 
         /*  Merge one or more options into the Client configuration.
             This accepts the same **options** as the constructor.
             Should be used before any call to connect().  */
-        public configure(options: object): Client
+        public set(options: object): Client
 
         /*  Initiate a connection to the server.
             This instanciates the internal network connections.  */

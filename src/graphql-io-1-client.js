@@ -23,8 +23,7 @@
 */
 
 /*  external dependencies  */
-import Latching       from "latching"
-import EventEmitter   from "eventemitter3"
+import StdAPI         from "stdapi"
 import Axios          from "axios"
 import UUID           from "pure-uuid"
 import Ducky          from "ducky"
@@ -35,20 +34,9 @@ import ApolloClientWS from "apollo-client-ws"
 import Query          from "./graphql-io-2-query"
 
 /*  the exported API class  */
-export default class Client extends EventEmitter {
+export default class Client extends StdAPI {
     constructor (options) {
-        super()
-
-        /*  define internal state  */
-        Object.defineProperty(this, "_", {
-            configurable: false,
-            enumerable:   false,
-            writable:     false,
-            value:        {}
-        })
-
-        /*  determine options  */
-        this._.options = Ducky.options({
+        super(options, {
             prefix:      [ "string", "GraphQL-IO-" ],
             url:         [ "/^https?:\\/\\/.+?:\\d+\\/.*$/", "http://127.0.0.1:8080/api" ],
             path: {
@@ -61,7 +49,7 @@ export default class Client extends EventEmitter {
             mode:        [ "/^(?:http|websocket)$/", "websocket" ],
             encoding:    [ "/^(?:cbor|msgpack|json)$/", "json" ],
             debug:       [ "number", 0 ]
-        }, options)
+        })
 
         /*  initialize internal state  */
         this._.nsUUID           = new UUID(5, "ns:URL", "http://graphql-io.com/ns/")
@@ -72,74 +60,45 @@ export default class Client extends EventEmitter {
         this._.networkInterface = null
         this._.token            = null
         this._.peer             = null
-
-        /*  provide latching sub-system  */
-        this._.latching = new Latching()
     }
 
     /*  INTERNAL: raise a fatal error  */
     error (err) {
-        this.log(1, `ERROR: ${err}`)
+        this.debug(1, `ERROR: ${err}`)
         this.emit("error", err)
-        return this
-    }
-
-    /*  INTERNAL: raise a debug message  */
-    log (level, msg) {
-        if (level <= this._.options.debug) {
-            let date = (new Date()).toISOString()
-            let log = `${date} DEBUG [${level}]: ${msg}`
-            this.emit("debug", { date, level, msg, log })
-        }
-        return this
-    }
-
-    /*  pass-through latching sub-system  */
-    at (...args) {
-        this._.latching.latch(...args)
-        return this
-    }
-    removeLatching (...args) {
-        this._.latching.unlatch(...args)
-        return this
-    }
-
-    /*  allow reconfiguration  */
-    configure (options) {
-        this._.options.merge(options)
         return this
     }
 
     /*  connect to the backend endpoints  */
     async connect () {
-        this.log(2, "connect to backend")
+        this.debug(2, "connect to backend")
 
         /*  create an Apollo Client network interface  */
-        if (this._.options.mode === "http") {
+        if (this.$.mode === "http") {
             /*  create HTTP-based interface  */
-            this.log(3, "create HTTP-based network interface")
+            this.debug(3, "create HTTP-based network interface")
             this._.networkInterface = ApolloClient.createNetworkInterface({
-                uri: `${this._.options.url}${this._.options.path.graph}`,
+                uri: `${this.$.url}${this.$.path.graph}`,
                 opts: {
                     credentials: "same-origin"
                 }
             })
         }
-        else if (this._.options.mode === "websocket") {
+        else if (this.$.mode === "websocket") {
             /*  create WebSocket-based interface  */
-            this.log(3, "create WebSocket-based network interface")
+            this.debug(3, "create WebSocket-based network interface")
             this._.networkInterface = ApolloClientWS.createNetworkInterface({
-                uri: `${this._.options.url.replace(/^http(s?):/, "ws$1:")}${this._.options.path.graph}`,
+                uri: `${this.$.url.replace(/^http(s?):/, "ws$1:")}${this.$.path.graph}`,
                 opts: {
                     keepalive: 0,
-                    debug:     this._.options.debug,
-                    encoding:  this._.options.encoding
+                    debug:     this.$.debug,
+                    encoding:  this.$.encoding
                 }
             })
 
             /*  pass-though debug messages  */
             this._.networkInterface.on("debug", ({ date, level, msg, log }) => {
-                this.log(2 + level, `[apollo-client-ws]: ${msg}`)
+                this.debug(2 + level, `[apollo-client-ws]: ${msg}`)
             })
         }
         else
@@ -166,8 +125,8 @@ export default class Client extends EventEmitter {
                 if (!options.headers)
                     options.headers = {}
                 options.headers.Cookie =
-                    `${this._.options.prefix}Token=${this._.token}; ` +
-                    `${this._.options.prefix}Peer=${this._.peer}`
+                    `${this.$.prefix}Token=${this._.token}; ` +
+                    `${this.$.prefix}Peer=${this._.peer}`
             }
             return options
         })
@@ -195,13 +154,13 @@ export default class Client extends EventEmitter {
         })
 
         /*  react on subscription messages  */
-        if (this._.options.mode === "websocket") {
+        if (this.$.mode === "websocket") {
             this._.networkInterface.on("receive", ({ type, data }) => {
                 if (type === "GRAPHQL-NOTIFY" && Ducky.validate(data, "[ string* ]")) {
-                    this.log(1, `GraphQL notification for subscriptions: ${data.join(", ")}`)
+                    this.debug(1, `GraphQL notification for subscriptions: ${data.join(", ")}`)
                     data.forEach((sid) => {
                         if (typeof this._.subscriptions[sid] === "object") {
-                            this.log(2, `refetch query of subscription ${sid}`)
+                            this.debug(2, `refetch query of subscription ${sid}`)
                             this._.subscriptions[sid].refetch()
                         }
                     })
@@ -210,7 +169,7 @@ export default class Client extends EventEmitter {
         }
 
         /*  perform an initial connect  */
-        if (this._.options.mode === "websocket")
+        if (this.$.mode === "websocket")
             await this._.networkInterface.connect()
 
         return this
@@ -219,8 +178,8 @@ export default class Client extends EventEmitter {
     /*  disconnect from the backend endpoints  */
     async disconnect () {
         /*  perform a final disconnect  */
-        this.log(2, "disconnect from backend")
-        if (this._.options.mode === "websocket")
+        this.debug(2, "disconnect from backend")
+        if (this.$.mode === "websocket")
             await this._.networkInterface.disconnect()
 
         /*  cleanup  */
@@ -231,18 +190,18 @@ export default class Client extends EventEmitter {
 
     /*  perform a login  */
     async login (implicit = false) {
-        this.log(2, `login at backend (${implicit ? "implicitly" : "explicit"})`)
+        this.debug(2, `login at backend (${implicit ? "implicitly" : "explicit"})`)
 
         /*  determine credentials  */
         if (!implicit) {
-            let { username, password } = await this._.latching.hook("login-credentials", "pass",
+            let { username, password } = await this.hook("login-credentials", "pass",
                 { username: this._.loginUsername, password: this._.loginPassword })
             this._.loginUsername = username
             this._.loginPassword = password
         }
 
         /*  send credentials to backend  */
-        return Axios.post(`${this._.options.url}${this._.options.path.login}`, {
+        return Axios.post(`${this.$.url}${this.$.path.login}`, {
             username: this._.loginUsername,
             password: this._.loginPassword
         }).then(async (response) => {
@@ -256,7 +215,7 @@ export default class Client extends EventEmitter {
             }
 
             /*  for WebSocket connections, force a re-establishment  */
-            if (this._.options.mode === "websocket") {
+            if (this.$.mode === "websocket") {
                 await this._.networkInterface.disconnect()
                 await this._.networkInterface.connect()
             }
@@ -269,8 +228,8 @@ export default class Client extends EventEmitter {
 
     /*  perform a logout  */
     logout (implicit = false) {
-        this.log(2, `logout at backend (${implicit ? "implicitly" : "explicit"})`)
-        return Axios.get(`${this._.options.url}${this._.options.path.logout}`).then(() => {
+        this.debug(2, `logout at backend (${implicit ? "implicitly" : "explicit"})`)
+        return Axios.get(`${this.$.url}${this.$.path.logout}`).then(() => {
             this._.loginUsername = null
             this._.loginPassword = null
             this._.token = null
@@ -284,8 +243,8 @@ export default class Client extends EventEmitter {
 
     /*  check session information  */
     session () {
-        this.log(2, "check session at backend")
-        return Axios.get(`${this._.options.url}${this._.options.path.session}`).then(({ data }) => {
+        this.debug(2, "check session at backend")
+        return Axios.get(`${this.$.url}${this.$.path.session}`).then(({ data }) => {
             return data
         }, (err) => {
             this.error(`session check failed: ${err}`)
@@ -312,8 +271,8 @@ export default class Client extends EventEmitter {
 
     /*  fetch  */
     fetch (name) {
-        this.log(2, `fetching BLOB "${name}"`)
-        return Axios.get(`${this._.options.url}${this._.options.path.blob}/${name}`).then((data) => {
+        this.debug(2, `fetching BLOB "${name}"`)
+        return Axios.get(`${this.$.url}${this.$.path.blob}/${name}`).then((data) => {
             return data
         }, (err) => {
             this.error(`fetchin of BLOB "${name}" failed: ${err}`)

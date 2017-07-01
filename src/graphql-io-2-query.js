@@ -73,7 +73,7 @@ export default class Query {
         }
 
         /*  assemble Apollo Client arguments  */
-        this._.api.log(1, `GraphQL query: ${query.replace(/(?:\s|\r?\n)+/g, " ")}`)
+        this._.api.debug(1, `GraphQL query: ${query.replace(/(?:\s|\r?\n)+/g, " ")}`)
         let kind = this._.type === "mutation" ? "mutation" : "query"
         this._.args = Object.assign({
             [ kind ]:    gql`${query}`,
@@ -90,10 +90,10 @@ export default class Query {
             promise = this._.api._.graphql.query(this._.args)
                 .then((result) => {
                     result = clone(result)
-                    this._.api.log(1, `GraphQL result: ${JSON.stringify(result)}`)
+                    this._.api.debug(1, `GraphQL result: ${JSON.stringify(result)}`)
                     return onResult(result)
                 }, (error) => {
-                    this._.api.log(1, `GraphQL error: ${JSON.stringify(error)}`)
+                    this._.api.debug(1, `GraphQL error: ${JSON.stringify(error)}`)
                     return onError(error)
                 })
                 .catch((err) => {
@@ -104,10 +104,10 @@ export default class Query {
             promise = this._.api._.graphql.mutate(this._.args)
                 .then((result) => {
                     result = clone(result)
-                    this._.api.log(1, `GraphQL result: ${JSON.stringify(result)}`)
+                    this._.api.debug(1, `GraphQL result: ${JSON.stringify(result)}`)
                     return onResult(result)
                 }, (error) => {
-                    this._.api.log(1, `GraphQL error: ${JSON.stringify(error)}`)
+                    this._.api.debug(1, `GraphQL error: ${JSON.stringify(error)}`)
                     return onError(error)
                 })
                 .catch((err) => {
@@ -152,12 +152,12 @@ export default class Query {
                     }
 
                     /*  pass-through execution to outer callback  */
-                    this._.api.log(1, `GraphQL result: ${JSON.stringify(result)}`)
+                    this._.api.debug(1, `GraphQL result: ${JSON.stringify(result)}`)
                     onResult(result)
                 },
                 error: (error) => {
                     /*  pass-through execution to outer callback  */
-                    this._.api.log(1, `GraphQL error: ${JSON.stringify(error)}`)
+                    this._.api.debug(1, `GraphQL error: ${JSON.stringify(error)}`)
                     if (onError)
                         onError(error)
                     else
