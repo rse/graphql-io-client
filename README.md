@@ -38,7 +38,7 @@ $ npm install graphql-io-client
 Usage
 -----
 
-Simple "Hello World":
+Simple [Hello World](https://github.com/rse/graphql-io-client/blob/master/sample/hello.js) Client:
 
 ```js
 const { Client } = require("graphql-io-client")
@@ -56,91 +56,33 @@ const { Client } = require("graphql-io-client")
 })
 ```
 
-Complex Example:
+Simple [Hello World](https://github.com/rse/graphql-io-server/blob/master/sample/hello.js) Server:
 
 ```js
-/*  external requirements  */
-const { inspect } = require("util")
-const { Client }  = require("graphql-io-client")
+const { Server } = require("graphql-io-server")
 
-/*  helper function for dumping data structure  */
-const dump = (data) => {
-    if (process.browser)
-        data = JSON.stringify(data, null, "    ")
-    else
-        data = inspect(data, { colors: true, depth: null })
-    return data
-}
-
-/*  create a GraphQL-IO client service instance  */
-const newService = async (id) => {
-    const sv = new Client({
-        url:      "http://127.0.0.1:12345/api",
-        path:     { graph: "" },
-        encoding: "cbor",
-        debug:    1
-    })
-    sv.on("debug", ({ log }) => {
-        console.error(`${id}: ${log}`)
-    })
-    await sv.connect()
-    return sv
-}
-
-/*  execute asynchronous function in a wrapping procedure  */
 ;(async () => {
-    /*  create two client service instances  */
-    const sv1 = await newService("sv1")
-    const sv2 = await newService("sv2")
-
-    /*  the first service continuously queries...  */
-    let subscription = sv1.query(`subscription {
-        OrgUnits {
-            id
-            name
-            director   { id name }
-            parentUnit { id name }
-            members    { id name }
-        }
-    }`).subscribe((response) => {
-        console.log(`sv1: response: ${dump(response)}`)
-    }, (err) => {
-        console.log(`sv1: ERROR: ${err}`)
-    })
-
-    /*  the second service manipulates multiple times...  */
-    let cnt = 0
-    let timer = setInterval(async () => {
-        await sv2.query(`mutation ($with: JSON!) {
-            OrgUnit (id: "XT") {
-                update(with: $with) {
-                    name
+    const sv = new Server({ url: "http://127.0.0.1:12345/api" })
+    sv.on("debug", ({ log }) => console.log(log))
+    sv.at("graphql-resolver", () => ({
+        Root: {
+            hello: [ `
+                #   hello world
+                hello(name: String): String`,
+                (obj, args, ctx, info) => {
+                    return args.name ? args.name : "world"
                 }
-            }
-        }`, {
-            with: {
-                name: `dummy${cnt}`
-            }
-        }).then((response) => {
-            console.log(`sv2: response: ${dump(response)}`)
-        }, (err) => {
-            console.log(`sv2: ERROR: ${err}`)
-        })
-        if (cnt++ >= 2) {
-            /*  stop processing  */
-            clearTimeout(timer)
-            setTimeout(async () => {
-                await subscription.unsubscribe()
-                await sv1.disconnect()
-                if (!process.browser)
-                    process.exit(0)
-            }, 1 * 1000)
+            ]
         }
-    }, 1 * 1000)
+    }))
+    await sv.start()
 })().catch((err) => {
-    console.log(`global: ERROR: ${err}`)
+    console.log("ERROR", err)
 })
 ```
+
+For a more elaborate example, see [Client Sample](https://github.com/rse/graphql-io-client/blob/master/sample/sample.js)
+an [Server Sample](https://github.com/rse/graphql-io-server/blob/master/sample/sample.js), too.
 
 Application Programming Interface (API)
 ---------------------------------------
