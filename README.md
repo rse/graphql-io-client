@@ -38,7 +38,7 @@ $ npm install graphql-io-client
 Usage
 -----
 
-Simple [Hello World](https://github.com/rse/graphql-io-client/blob/master/sample/hello.js) Client:
+Simple [Hello World Client](https://github.com/rse/graphql-io-client/blob/master/sample/hello.js):
 
 ```js
 (async () => {
@@ -58,7 +58,7 @@ Simple [Hello World](https://github.com/rse/graphql-io-client/blob/master/sample
 })
 ```
 
-Simple [Hello World](https://github.com/rse/graphql-io-server/blob/master/sample/hello.js) Server:
+Simple [Hello World Server](https://github.com/rse/graphql-io-server/blob/master/sample/hello.js):
 
 ```js
 (async () => {
