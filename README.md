@@ -41,9 +41,10 @@ Usage
 Simple [Hello World](https://github.com/rse/graphql-io-client/blob/master/sample/hello.js) Client:
 
 ```js
-const { Client } = require("graphql-io-client")
+(async () => {
 
-;(async () => {
+    /*  Hello World Client  */
+    const { Client } = require("graphql-io-client")
     const sv = new Client({ url: "http://127.0.0.1:12345/api" })
     sv.on("debug", ({ log }) => console.log(log))
     await sv.connect()
@@ -51,6 +52,7 @@ const { Client } = require("graphql-io-client")
     let result = await sv.query(name ? `{ hello(name: "${name}") }` : "{ hello }")
     console.log(result.data)
     await sv.disconnect()
+
 })().catch((err) => {
     console.log("ERROR", err)
 })
@@ -59,9 +61,10 @@ const { Client } = require("graphql-io-client")
 Simple [Hello World](https://github.com/rse/graphql-io-server/blob/master/sample/hello.js) Server:
 
 ```js
-const { Server } = require("graphql-io-server")
+(async () => {
 
-;(async () => {
+    /*  Hello World Server  */
+    const { Server } = require("graphql-io-server")
     const sv = new Server({ url: "http://127.0.0.1:12345/api" })
     sv.on("debug", ({ log }) => console.log(log))
     sv.at("graphql-resolver", () => ({
@@ -76,6 +79,7 @@ const { Server } = require("graphql-io-server")
         }
     }))
     await sv.start()
+
 })().catch((err) => {
     console.log("ERROR", err)
 })
