@@ -67,7 +67,7 @@ module.exports = function (grunt) {
                         [ "browserify-header" ]
                     ],
                     browserifyOptions: {
-                        standalone: "GraphQLFrontend",
+                        standalone: "GraphQLClient",
                         debug: false
                     }
                 }
