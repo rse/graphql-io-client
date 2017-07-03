@@ -48,6 +48,7 @@ export default class Client extends StdAPI {
             },
             mode:        [ "/^(?:http|websocket)$/", "websocket" ],
             encoding:    [ "/^(?:cbor|msgpack|json)$/", "json" ],
+            typenames:   [ "boolean", false ],
             debug:       [ "number", 0 ]
         })
 
@@ -150,7 +151,7 @@ export default class Client extends StdAPI {
         this._.graphql = new ApolloClient({
             networkInterface: this._.networkInterface,
             dataIdFromObject: dataIdFromObject,
-            addTypename:      true
+            addTypename:      this.$.typenames
         })
 
         /*  react on subscription messages  */
