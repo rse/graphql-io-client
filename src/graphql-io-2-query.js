@@ -143,6 +143,7 @@ export default class Query {
                         && typeof result.data.Subscription.subscribe === "string") {
                         subscription._.sid = result.data.Subscription.subscribe
                         this._.api._.subscriptions[subscription._.sid] = watcher
+                        delete result.data.Subscription
                     }
 
                     /*  optionally resolve this "next" promise initially  */
@@ -152,12 +153,14 @@ export default class Query {
                     }
 
                     /*  pass-through execution to outer callback  */
-                    this._.api.debug(1, `GraphQL result: ${JSON.stringify(result)}`)
+                    this._.api.debug(1, `GraphQL result: ${JSON.stringify(result)} ` +
+                        `(sid: ${subscription._.sid !== "" ? subscription._.sid : "none"})`)
                     onResult(result)
                 },
                 error: (error) => {
                     /*  pass-through execution to outer callback  */
-                    this._.api.debug(1, `GraphQL error: ${JSON.stringify(error)}`)
+                    this._.api.debug(1, `GraphQL error: ${JSON.stringify(error)} ` +
+                        `(sid: ${subscription._.sid !== "" ? subscription._.sid : "none"})`)
                     if (onError)
                         onError(error)
                     else
