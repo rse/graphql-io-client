@@ -47,7 +47,7 @@ export default class Subscription {
             throw new Error(`query not active (currently in "${this._.state}" state)`)
         return (this._.next = this._.next.then(() => {
             return this._.query._.api.query(`mutation ($sid: UUID!) {
-                Subscription { pause(sid: $sid) }
+                _Subscription { pause(sid: $sid) }
             }`, { sid: this._.sid }).then(() => {
                 this._.state = "paused"
                 return true
@@ -61,7 +61,7 @@ export default class Subscription {
             throw new Error(`query not paused (currently in "${this._.state}" state)`)
         return (this._.next = this._.next.then(() => {
             return this._.query._.api.query(`mutation ($sid: UUID!) {
-                Subscription { resume(sid: $sid) }
+                _Subscription { resume(sid: $sid) }
             }`, { sid: this._.sid }).then(() => {
                 this._.state = "subscribed"
                 return true
@@ -75,7 +75,7 @@ export default class Subscription {
             throw new Error("query already unsubscribed")
         return (this._.next = this._.next.then(() => {
             return this._.query._.api.query(`mutation ($sid: UUID!) {
-                Subscription { unsubscribe(sid: $sid) }
+                _Subscription { unsubscribe(sid: $sid) }
             }`, { sid: this._.sid }).then(() => {
                 delete this._.query._.api._.subscriptions[this._.sid]
                 if (this._.unsubscribe !== null)

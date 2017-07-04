@@ -69,7 +69,7 @@ export default class Query {
             if (!query.match(/^\s*subscription.*?\{/))
                 throw new Error("subscription requires non-abbreviated GraphQL query string")
             query = query.replace(/^(\s*)subscription(.*?\{)/,
-                "$1query$2 Subscription { subscribe } ")
+                "$1query$2 _Subscription { subscribe } ")
         }
 
         /*  assemble Apollo Client arguments  */
@@ -133,17 +133,17 @@ export default class Query {
                     /*  clone data structure  */
                     result = clone(result, false)
 
-                    /*  extract subscription id from "Subscription.subscribe" field  */
+                    /*  extract subscription id from "_Subscription.subscribe" field  */
                     if (   typeof result === "object"
                         && result !== null
                         && typeof result.data === "object"
                         && result.data !== null
-                        && typeof result.data.Subscription === "object"
-                        && result.data.Subscription !== null
-                        && typeof result.data.Subscription.subscribe === "string") {
-                        subscription._.sid = result.data.Subscription.subscribe
+                        && typeof result.data._Subscription === "object"
+                        && result.data._Subscription !== null
+                        && typeof result.data._Subscription.subscribe === "string") {
+                        subscription._.sid = result.data._Subscription.subscribe
                         this._.api._.subscriptions[subscription._.sid] = watcher
-                        delete result.data.Subscription
+                        delete result.data._Subscription
                     }
 
                     /*  optionally resolve this "next" promise initially  */
