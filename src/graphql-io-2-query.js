@@ -65,12 +65,9 @@ export default class Query {
             query = `query ${query}`
 
         /*  optionally inject "subscribe" operation into query  */
-        if (this._.type === "subscription") {
-            if (!query.match(/^\s*subscription.*?\{/))
-                throw new Error("subscription requires non-abbreviated GraphQL query string")
+        if (this._.type === "subscription")
             query = query.replace(/^(\s*)subscription(.*?\{)/,
                 "$1query$2 _Subscription { subscribe } ")
-        }
 
         /*  assemble Apollo Client arguments  */
         this._.api.debug(1, `GraphQL query: ${query.replace(/(?:\s|\r?\n)+/g, " ")}`)
