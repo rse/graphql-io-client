@@ -38,32 +38,30 @@ $ npm install graphql-io-client
 Usage
 -----
 
-Simple Hello World Client.
+```js
+/*  all-in-one  */
+import { Client } from "graphql-io"
+
+/*  client-side only  */
+import { Client } from "graphql-io-client"
+```
+
+See the [TypeScript type definition of the GraphQL-IO-Client API](src/graphql-io.d.ts) for details.
+
+Sample
+------
 
 ```js
-(async () => {
-
-    /*  Hello World Client  */
-    const { Client } = require("graphql-io-client")
-    const sv = new Client({ url: "http://127.0.0.1:12345/api" })
-    sv.on("debug", ({ log }) => console.log(log))
-    await sv.connect()
-    let name = process.argv[2]
-    let result = await sv.query(name ? `{ hello(name: "${name}") }` : "{ hello }")
-    console.log(result.data)
-    await sv.disconnect()
-
-})().catch((err) => {
-    console.log("ERROR", err)
-})
+/*  Hello World Client  */
+const { Client } = require("graphql-io-client")
+const client = new Client({ url: "http://127.0.0.1:12345/api" })
+await client.connect()
+let result = await client.query("{ hello }")
+await client.disconnect()
+console.log(result.data)
 ```
 
 For more elaborate samples, check out the [Samples](https://github.com/rse/graphql-io/tree/master/sample/) folder.
-
-Application Programming Interface (API)
----------------------------------------
-
-See the [TypeScript type definition of the GraphQL-IO-Client API](src/graphql-io.d.ts) for details.
 
 License
 -------
