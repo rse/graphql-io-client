@@ -38,8 +38,7 @@ $ npm install graphql-io-client
 Usage
 -----
 
-Simple [Hello World Client](https://github.com/rse/graphql-io-client/blob/master/sample/hello.js)
-(see [Hello World Server](https://github.com/rse/graphql-io-server/blob/master/sample/hello.js) for server-part):
+Simple Hello World Client.
 
 ```js
 (async () => {
@@ -59,8 +58,7 @@ Simple [Hello World Client](https://github.com/rse/graphql-io-client/blob/master
 })
 ```
 
-For a more elaborate example, see [Client Sample](https://github.com/rse/graphql-io-client/blob/master/sample/sample.js)
-an [Server Sample](https://github.com/rse/graphql-io-server/blob/master/sample/sample.js), too.
+For more elaborate samples, check out the [Samples](https://github.com/rse/graphql-io/tree/master/sample/) folder.
 
 Application Programming Interface (API)
 ---------------------------------------
