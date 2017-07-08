@@ -41,7 +41,7 @@
         "grunt-browserify":               "~5.0.0",
         "grunt-babel":                    "~6.0.0",
         "grunt-tslint":                   "~5.0.1",
-        "tslint":                         "~5.4.3",
+        "tslint":                         "~5.5.0",
         "typescript":                     "~2.4.1",
         "browserify":                     "~14.4.0",
         "babelify":                       "~7.3.0",
@@ -61,7 +61,7 @@
         "eslint-config-standard":         "~10.2.1",
         "eslint-plugin-standard":         "~3.0.1",
         "eslint-plugin-promise":          "~3.5.0",
-        "eslint-plugin-import":           "~2.6.1",
+        "eslint-plugin-import":           "~2.7.0",
         "eslint-plugin-node":             "~5.1.0"
     },
     "engines": {
