@@ -38,13 +38,13 @@ export default class Client extends StdAPI {
     constructor (options) {
         super(options, {
             prefix:      [ "string", "GraphQL-IO-" ],
-            url:         [ "/^https?:\\/\\/.+?:\\d+(?:\\/.*)?$/", "http://127.0.0.1:8080/api" ],
+            url:         [ "/^https?:\\/\\/.+?:\\d+$/", "http://127.0.0.1:8080" ],
             path: {
-                login:   [ "/^(?:|\\/.+)$/", "/auth/login" ],
-                session: [ "/^(?:|\\/.+)$/", "/auth/session" ],
-                logout:  [ "/^(?:|\\/.+)$/", "/auth/logout" ],
-                graph:   [ "/^(?:|\\/.+)$/", "/data/graph" ],
-                blob:    [ "/^(?:|\\/.+)$/", "/data/blob" ]
+                login:   [ "/^\\/.+$/", "/api/auth/login" ],
+                session: [ "/^\\/.+$/", "/api/auth/session" ],
+                logout:  [ "/^\\/.+$/", "/api/auth/logout" ],
+                graph:   [ "/^\\/.+$/", "/api/data/graph" ],
+                blob:    [ "/^\\/.+$/", "/api/data/blob" ]
             },
             mode:        [ "/^(?:http|websocket)$/", "websocket" ],
             encoding:    [ "/^(?:cbor|msgpack|json)$/", "json" ],

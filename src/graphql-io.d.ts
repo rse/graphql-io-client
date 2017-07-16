@@ -31,35 +31,35 @@ declare module "graphql-io-client" {
         /*  Construct a new GraphQL-IO Client instance.  */
         public constructor(options?: {
             /*  The base URL of the server.
-                Has to match the regex `^https?:\/\/.+?:\d+\/.*$`.
-                The default is `"http://127.0.0.1:8080/api"`.  */
+                Has to match the regex `^https?:\/\/.+?:\d+$`.
+                The default is `"http://127.0.0.1:8080"`.  */
             url: string,
 
             /*  The URL path specification.  */
             path: {
                 /*  The relative URL path to the login service of the server.
-                    Has to match the regex `^(?:|\\/.+)$`.
-                    The default is `/auth/login`.  */
+                    Has to match the regex `^\\/.+$`.
+                    The default is `/api/auth/login`.  */
                 login: string,
 
                 /*  The relative URL path to the session service of the server.
-                    Has to match the regex `^(?:|\\/.+)$`.
-                    The default is `/auth/session`.  */
+                    Has to match the regex `^\\/.+$`.
+                    The default is `/api/auth/session`.  */
                 session: string,
 
                 /*  The relative URL path to the logout service of the server.
-                    Has to match the regex `^(?:|\\/.+)$`.
-                    The default is `/auth/logout`.  */
+                    Has to match the regex `^\\/.+$`.
+                    The default is `/api/auth/logout`.  */
                 logout: string,
 
                 /*  The relative URL path to the GraphQL service of the server.
-                    Has to match the regex `^(?:|\\/.+)$`.
-                    The default is `/data/graph`.  */
+                    Has to match the regex `^\\/.+$`.
+                    The default is `/api/data/graph`.  */
                 graph: string,
 
                 /*  The relative URL path to the BLOB service of the server.
-                    Has to match the regex `^(?:|\\/.+)$`.
-                    The default is `/data/blob`.  */
+                    Has to match the regex `^\\/.+$`.
+                    The default is `/api/data/blob`.  */
                 blob: string
             },
 
