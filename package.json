@@ -23,7 +23,7 @@
     "browserify-shim": {
     },
     "dependencies": {
-        "stdapi":                         "~0.9.4",
+        "stdapi":                         "~0.9.5",
         "graphql-tag":                    "~2.4.2",
         "apollo-client":                  "~1.9.0-0",
         "apollo-client-ws":               "~1.0.10",
