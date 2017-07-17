@@ -141,13 +141,16 @@ declare module "graphql-io-client" {
     /*  The secondary interface for representing a GraphQL query subscription in order
         to pause, resume and unsubscribe it.  */
     interface Subscription {
+        /*  Return current state of subscription ("unsubscribed", "subscribed", "paused")  */
+        state(): string
+
         /*  Pause the subscription at the server.  */
         pause(): Promise<boolean>
 
         /*  Resume the subscription at the server.  */
         resume(): Promise<boolean>
 
-        /* Unsubscribe the subscription at the server.  */
+        /*  Unsubscribe the subscription at the server.  */
         unsubscribe(): Promise<boolean>
     }
 

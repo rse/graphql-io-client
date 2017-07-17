@@ -41,6 +41,11 @@ export default class Subscription {
         this._.next        = null
     }
 
+    /*  check status  */
+    state () {
+        return this._.state
+    }
+
     /*  pause subscription  */
     pause () {
         if (this._.state !== "subscribed")
