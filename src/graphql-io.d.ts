@@ -119,11 +119,17 @@ declare module "graphql-io-client" {
         public session(): Promise<object>
 
         /*  Send a GraphQL **query** (with optional **variables**) to the server.
-            Apollo Client **options** can be passed-through. For GraphQL query
-            or query subscription, the **query** parameter can have the
-            operation prefix `query` omitted. For GraphQL mutation, the **query**
-            parameter has to start with the operation prefix `mutation`.  */
+            Apollo Client **options** can be optionally passed-through, too. For GraphQL query,
+            operation, the **query** parameter can have the operation prefix `query` omitted.
+            For GraphQL mutation operation, the **query** parameter has to start with the operation
+            prefix `mutation`.  */
+        public graphql(query: string, variables?: object, options?: object): Query
+
+        /*  Convenient short-hand method for `graphql("query [...]"[, ...])`.  */
         public query(query: string, variables?: object, options?: object): Query
+
+        /*  Convenient short-hand method for `graphql("mutation [...]"[, ...])`.  */
+        public mutation(query: string, variables?: object, options?: object): Query
     }
 
     /*  The secondary interface for representing a GraphQL query or mutation

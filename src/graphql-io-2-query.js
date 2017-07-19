@@ -31,12 +31,14 @@ import Subscription from "./graphql-io-3-subscription"
 
 /*  the Query class  */
 export default class Query {
-    constructor (api, error, query, vars, opts) {
+    constructor (api, error, type, query, vars, opts) {
         /*  sanity check options  */
         if (typeof api !== "object")
             throw new Error("invalid options (object expected for API argument)")
         if (typeof error !== "function")
             throw new Error("invalid options (function expected for error argument)")
+        if (typeof type !== "string" || !type.match(/^(?:query|mutation|)$/))
+            throw new Error("invalid options (string expected for type argument)")
         if (typeof query !== "string")
             throw new Error("invalid options (string expected for query argument)")
         if (typeof vars !== "object")
@@ -55,35 +57,49 @@ export default class Query {
         /*  remember results  */
         this._.api   = api
         this._.error = error
+        this._.type  = type
+        this._.query = query
+        this._.vars  = vars
+        this._.opts  = opts
 
-        /*  determine query type  */
-        this._.type = "query"
-        let m = query.match(/^\s*(query|mutation|subscription)\b/)
-        if (m !== null)
-            this._.type = m[1]
-        else
-            query = `query ${query}`
-
-        /*  optionally inject "subscribe" operation into query  */
-        if (this._.type === "subscription")
-            query = query.replace(/^(\s*)subscription(.*?\{)/,
-                "$1query$2 _Subscription { subscribe } ")
-
-        /*  assemble Apollo Client arguments  */
-        this._.api.debug(1, `GraphQL query: ${query.replace(/(?:\s|\r?\n)+/g, " ")}`)
-        let kind = this._.type === "mutation" ? "mutation" : "query"
-        this._.args = Object.assign({
-            [ kind ]:    gql`${query}`,
-            variables:   vars,
-            fetchPolicy: "network-only"
-        }, opts)
+        /*  determine and sanity check GraphQL operation type  */
+        let m = this._.query.match(/^\s*(query|mutation|subscription)\b/)
+        if (m !== null) {
+            /*  explicit GraphQL operation given in query  */
+            if (m[1] === "subscription")
+                throw new Error("GraphQL \"subscription\" operation not supported " +
+                    "(use subscribe() on a regular query operation instead)")
+            else if (this._.type !== "" && this._.type !== m[1])
+                throw new Error(`invalid GraphQL operation "${m[1]}" ` +
+                    `(method ${this._.type}() requires a matching GraphQL "${this._.type}" operation)`)
+            else
+                this._.type = m[1]
+        }
+        else if (this._.type !== "")
+            /*  explicit GraphQL operation NOT given in query, but implicitly given via method  */
+            this._.query = `${this._.type} ${this._.query}`
+        else if (this._.type === "") {
+            /*  explicit GraphQL operation NOT given in query and NOT implicitly given via method  */
+            this._.type  = "query"
+            this._.query = `query ${this._.query}`
+        }
     }
 
     /*  configure one-time callback  */
     then (onResult, onError = (err) => { throw err }) {
+        /*  assemble Apollo Client query/mutation arguments  */
+        let kind = this._.type === "mutation" ? "mutation" : "query"
+        this._.args = Object.assign({
+            [ kind ]:    gql`${this._.query}`,
+            variables:   this._.vars,
+            fetchPolicy: "network-only"
+        }, this._.opts)
+
         /*  just return the Promise of the underlying Apollo Client query/mutate methods  */
+        this._.api.debug(1, `GraphQL query: ${this._.query.replace(/(?:\s|\r?\n)+/g, " ")}`)
         let promise
         if (this._.type === "query") {
+            /*  GraphQL "query"  */
             promise = this._.api._.graphql.query(this._.args)
                 .then((result) => {
                     result = clone(result)
@@ -98,6 +114,7 @@ export default class Query {
                 })
         }
         else if (this._.type === "mutation") {
+            /*  GraphQL "mutation"  */
             promise = this._.api._.graphql.mutate(this._.args)
                 .then((result) => {
                     result = clone(result)
@@ -111,18 +128,31 @@ export default class Query {
                     this._.error(err)
                 })
         }
-        else if (this._.type === "subscription")
-            throw new Error("you have to call \"subscribe\" on GraphQL subscription operations")
         return promise
     }
 
     /*  configure multiple-time callback  */
     subscribe (onResult, onError = (err) => { throw err }) {
-        /*  create a Subscription around the Apollo Client watchQuery method  */
-        if (this._.type !== "subscription")
-            throw new Error("you have to call \"then\" on GraphQL query/mutation operations")
+        /*  sanity check usage  */
+        if (this._.type !== "query")
+            throw new Error("you can call \"subscribe\" on GraphQL query operations only")
+
+        /*  late inject "subscribe" operation into query  */
+        this._.query = this._.query.replace(/^(\s*query.*?\{)/,
+            "$1 _Subscription { subscribe } ")
+
+        /*  assemble Apollo Client watchQuery arguments  */
+        this._.args = Object.assign({
+            query:        gql`${this._.query}`,
+            variables:    this._.vars,
+            fetchPolicy:  "network-only",
+            pollInterval: 60 * 1000
+        }, this._.opts)
+
+        /*  create a Subscription around the Apollo Client "watchQuery" method  */
+        this._.api.debug(1, `GraphQL query: ${this._.query.replace(/(?:\s|\r?\n)+/g, " ")}`)
         let subscription = new Subscription(this)
-        let watcher = this._.api._.graphql.watchQuery(Object.assign({}, this._.args, { pollInterval: 60 * 1000 }))
+        let watcher = this._.api._.graphql.watchQuery(this._.args)
         subscription._.next = new Promise((resolve, reject) => {
             let first = true
             subscription._.unsubscribe = watcher.subscribe({

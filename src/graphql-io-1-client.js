@@ -253,8 +253,8 @@ export default class Client extends StdAPI {
         })
     }
 
-    /*  query  */
-    query (query, vars = {}, opts = {}) {
+    /*  query (internal API)  */
+    _graphql (type, query, vars = {}, opts = {}) {
         const onError = (err) => {
             if (   typeof err === "object"
                 && err !== null
@@ -262,13 +262,18 @@ export default class Client extends StdAPI {
                 && err.graphQLErrors instanceof Array   ) {
                 let error = err.graphQLErrors[0]
                 let path = (typeof error.path === "object" && error.path instanceof Array ? error.path[0] : "")
-                this.error(`${path} failed: ${error.message}`)
+                this.error(`failed at ${path}: ${error.message}`)
             }
             else
                 this.error(`${err.message}`)
         }
-        return new Query(this, onError, query, vars, opts)
+        return new Query(this, onError, type, query, vars, opts)
     }
+
+    /*  query (official API)  */
+    graphql  (...args) { return this._graphql("", ...args) }
+    query    (...args) { return this._graphql("query", ...args) }
+    mutation (...args) { return this._graphql("mutation", ...args) }
 
     /*  fetch  */
     fetch (name) {
