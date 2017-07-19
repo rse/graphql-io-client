@@ -263,8 +263,9 @@ export default class Client extends StdAPI {
                 && typeof err.graphQLErrors === "object"
                 && err.graphQLErrors instanceof Array   ) {
                 let error = err.graphQLErrors[0]
-                let path = (typeof error.path === "object" && error.path instanceof Array ? error.path[0] : "")
-                this.error(`failed at ${path}: ${error.message}`)
+                let path = (typeof error.path === "object" && error.path instanceof Array ?
+                    error.path.join(".") : "")
+                this.error(`error at ${path}: ${error.message}`)
             }
             else
                 this.error(`${err.message}`)
