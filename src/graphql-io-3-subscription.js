@@ -51,7 +51,7 @@ export default class Subscription {
         return (this._.next = this._.next.then(() => {
             if (this._.state !== "subscribed")
                 throw new Error(`query not active (currently in "${this._.state}" state)`)
-            return this._.query._.api.query(`mutation ($sid: UUID!) {
+            return this._.query._.api.graphql(`mutation ($sid: UUID!) {
                 _Subscription { pause(sid: $sid) }
             }`, { sid: this._.sid }).then(() => {
                 this._.state = "paused"
@@ -65,7 +65,7 @@ export default class Subscription {
         return (this._.next = this._.next.then(() => {
             if (this._.state !== "paused")
                 throw new Error(`query not paused (currently in "${this._.state}" state)`)
-            return this._.query._.api.query(`mutation ($sid: UUID!) {
+            return this._.query._.api.graphql(`mutation ($sid: UUID!) {
                 _Subscription { resume(sid: $sid) }
             }`, { sid: this._.sid }).then(() => {
                 this._.state = "subscribed"
@@ -79,7 +79,7 @@ export default class Subscription {
         return (this._.next = this._.next.then(() => {
             if (this._.state === "unsubscribed")
                 throw new Error("query already unsubscribed")
-            return this._.query._.api.query(`mutation ($sid: UUID!) {
+            return this._.query._.api.graphql(`mutation ($sid: UUID!) {
                 _Subscription { unsubscribe(sid: $sid) }
             }`, { sid: this._.sid }).then(() => {
                 delete this._.query._.api._.subscriptions[this._.sid]
