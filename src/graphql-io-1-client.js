@@ -48,6 +48,7 @@ export default class Client extends StdAPI {
             },
             mode:        [ "/^(?:http|websocket)$/", "websocket" ],
             encoding:    [ "/^(?:cbor|msgpack|json)$/", "json" ],
+            compress:    [ "boolean", false ],
             typenames:   [ "boolean", false ],
             debug:       [ "number", 0 ]
         })
@@ -93,7 +94,8 @@ export default class Client extends StdAPI {
                 opts: {
                     keepalive: 0,
                     debug:     this.$.debug,
-                    encoding:  this.$.encoding
+                    encoding:  this.$.encoding,
+                    compress:  this.$.compress
                 }
             })
 
