@@ -20,13 +20,13 @@
     "browserify-shim": {
     },
     "dependencies": {
-        "stdapi":                         "~0.9.5",
+        "stdapi":                         "~0.9.6",
         "graphql-tag":                    "~2.4.2",
         "apollo-client":                  "~1.9.3",
-        "apollo-client-ws":               "~1.0.14",
+        "apollo-client-ws":               "~1.0.15",
         "axios":                          "~0.16.2",
         "pure-uuid":                      "~1.4.8",
-        "ducky":                          "~2.6.1",
+        "ducky":                          "~2.6.2",
         "clone":                          "~2.1.1"
     },
     "devDependencies": {
