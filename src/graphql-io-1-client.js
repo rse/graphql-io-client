@@ -38,7 +38,7 @@ export default class Client extends StdAPI {
     constructor (options) {
         super(options, {
             prefix:      [ "string", "GraphQL-IO-" ],
-            url:         [ "/^https?:\\/\\/.+?:\\d+$/", "http://127.0.0.1:8080" ],
+            url:         [ "/^https?:\\/\\/.+?(?::\\d+)?$/", "http://127.0.0.1:8080" ],
             path: {
                 login:   [ "/^\\/.+$/", "/api/auth/login" ],
                 session: [ "/^\\/.+$/", "/api/auth/session" ],
