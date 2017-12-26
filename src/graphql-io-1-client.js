@@ -23,12 +23,17 @@
 */
 
 /*  external dependencies  */
-import StdAPI         from "stdapi"
-import Axios          from "axios"
-import UUID           from "pure-uuid"
-import Ducky          from "ducky"
-import ApolloClient   from "apollo-client"
-import ApolloClientWS from "apollo-client-ws"
+import StdAPI             from "stdapi"
+import Axios              from "axios"
+import UUID               from "pure-uuid"
+import Ducky              from "ducky"
+import { ApolloClient }   from "apollo-client"
+import { ApolloClientWS } from "apollo-client-ws"
+import { ApolloLink }     from "apollo-link"
+import { HttpLink }       from "apollo-link-http"
+import { onError }        from "apollo-link-error"
+import { InMemoryCache }  from "apollo-cache-inmemory"
+import CrossFetch         from "cross-fetch"
 
 /*  internal dependencies  */
 import Query          from "./graphql-io-2-query"
@@ -57,9 +62,11 @@ export default class Client extends StdAPI {
         this._.nsUUID           = new UUID(5, "ns:URL", "http://graphql-io.com/ns/")
         this._.loginUsername    = ""
         this._.loginPassword    = ""
-        this._.graphql          = null
+        this._.graphqlClient    = null
+        this._.graphqlLinkErr   = null
+        this._.graphqlLinkNet   = null
+        this._.graphqlCache     = null
         this._.subscriptions    = {}
-        this._.networkInterface = null
         this._.token            = null
         this._.peer             = null
     }
@@ -75,21 +82,22 @@ export default class Client extends StdAPI {
     async connect () {
         this.debug(2, "connect to backend")
 
-        /*  create an Apollo Client network interface  */
+        /*  create networking Apollo Link instance  */
         if (this.$.mode === "http") {
             /*  create HTTP-based interface  */
             this.debug(3, "create HTTP-based network interface")
-            this._.networkInterface = ApolloClient.createNetworkInterface({
+            this._.graphqlLinkNet = new HttpLink({
                 uri: `${this.$.url}${this.$.path.graph}`,
                 opts: {
-                    credentials: "same-origin"
+                    credentials: "same-origin",
+                    fetch:       CrossFetch
                 }
             })
         }
         else if (this.$.mode === "websocket") {
             /*  create WebSocket-based interface  */
             this.debug(3, "create WebSocket-based network interface")
-            this._.networkInterface = ApolloClientWS.createNetworkInterface({
+            this._.graphqlLinkNet = new ApolloClientWS({
                 uri: `${this.$.url.replace(/^http(s?):/, "ws$1:")}${this.$.path.graph}`,
                 opts: {
                     keepalive: 0,
@@ -99,39 +107,35 @@ export default class Client extends StdAPI {
                 }
             })
 
-            /*  pass-though debug messages  */
-            this._.networkInterface.on("debug", ({ date, level, msg, log }) => {
+            /*  pass-through debug messages  */
+            this._.graphqlLinkNet.on("debug", ({ date, level, msg, log }) => {
                 this.debug(2 + level, `[apollo-client-ws]: ${msg}`)
+            })
+
+            /*  hook into WebSocket creation to send authentication cookie and peer id
+                (Notice: called under Node environment only, but for Browser
+                environments this is not necessary, as Cookie is sent automatically)  */
+            this._.graphqlLinkNet.at("connect:options", (options) => {
+                if (this._.token !== null && this._.peer !== null) {
+                    if (!options.headers)
+                        options.headers = {}
+                    options.headers.Cookie =
+                        `${this.$.prefix}Token=${this._.token}; ` +
+                        `${this.$.prefix}Peer=${this._.peer}`
+                }
+                return options
             })
         }
         else
             throw new Error("invalid communication mode")
 
-        /*  add middleware to auto-logout/login on HTTP 401 responses  */
-        this._.networkInterface.useAfter([{
-            applyAfterware: async (response, next) => {
-                if (   response === "object"
-                    && response !== null
-                    && response.status === 401) {
-                    await this.logout(true)
-                    await this.login(true)
-                }
-                next()
+        /*  create error handling Apollo Link instance  */
+        this._.graphqlLinkErr = onError(async ({ networkError }) => {
+            /*  auto-logout/login on HTTP 401 responses  */
+            if (networkError.status === 401) {
+                await this.logout(true)
+                await this.login(true)
             }
-        }])
-
-        /*  hook into WebSocket creation to send authentication cookie and peer id
-            (Notice: called under Node environment only, but for Browser
-            environments this is not necessary, as Cookie is sent automatically)  */
-        this._.networkInterface.at("connect:options", (options) => {
-            if (this._.token !== null && this._.peer !== null) {
-                if (!options.headers)
-                    options.headers = {}
-                options.headers.Cookie =
-                    `${this.$.prefix}Token=${this._.token}; ` +
-                    `${this.$.prefix}Peer=${this._.peer}`
-            }
-            return options
         })
 
         /*  provide a mapper for the unique ids of entities
@@ -149,16 +153,24 @@ export default class Client extends StdAPI {
             }
         }
 
-        /*  create the Apollo Client instance  */
-        this._.graphql = new ApolloClient({
-            networkInterface: this._.networkInterface,
+        /*  create the Apollo Client Cache instance  */
+        this._.graphqlCache = new InMemoryCache({
             dataIdFromObject: dataIdFromObject,
             addTypename:      this.$.typenames
         })
 
+        /*  create the Apollo Client instance  */
+        this._.graphqlClient = new ApolloClient({
+            cache: this._.graphqlCache,
+            link:  ApolloLink.from([
+                this._.graphqlLinkErr,
+                this._.graphqlLinkNet
+            ])
+        })
+
         /*  react on subscription messages  */
         if (this.$.mode === "websocket") {
-            this._.networkInterface.on("receive", ({ type, data }) => {
+            this._.graphqlLinkNet.on("receive", ({ type, data }) => {
                 if (type === "GRAPHQL-NOTIFY" && Ducky.validate(data, "[ string* ]")) {
                     this.debug(1, `GraphQL notification for subscriptions: ${data.join(", ")}`)
                     data.forEach((sid) => {
@@ -173,7 +185,7 @@ export default class Client extends StdAPI {
 
         /*  perform an initial connect  */
         if (this.$.mode === "websocket")
-            await this._.networkInterface.connect()
+            await this._.graphqlLinkNet.connect()
 
         return this
     }
@@ -183,11 +195,13 @@ export default class Client extends StdAPI {
         /*  perform a final disconnect  */
         this.debug(2, "disconnect from backend")
         if (this.$.mode === "websocket")
-            await this._.networkInterface.disconnect()
+            await this._.graphqlLinkNet.disconnect()
 
         /*  cleanup  */
-        this._.graphql          = null
-        this._.networkInterface = null
+        this._.graphqlClient  = null
+        this._.graphqlCache   = null
+        this._.graphqlLinkErr = null
+        this._.graphqlLinkNet = null
         return this
     }
 
@@ -219,8 +233,8 @@ export default class Client extends StdAPI {
 
             /*  for WebSocket connections, force a re-establishment  */
             if (this.$.mode === "websocket") {
-                await this._.networkInterface.disconnect()
-                await this._.networkInterface.connect()
+                await this._.graphqlLinkNet.disconnect()
+                await this._.graphqlLinkNet.connect()
             }
             return true
         }, (err) => {
@@ -235,8 +249,8 @@ export default class Client extends StdAPI {
         return Axios.get(`${this.$.url}${this.$.path.logout}`).then(() => {
             this._.loginUsername = null
             this._.loginPassword = null
-            this._.token = null
-            this._.peer  = null
+            this._.token         = null
+            this._.peer          = null
             return true
         }, (err) => {
             this.error(`logout failed: ${err}`)

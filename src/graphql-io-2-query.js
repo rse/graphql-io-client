@@ -100,7 +100,7 @@ export default class Query {
         let promise
         if (this._.type === "query") {
             /*  GraphQL "query"  */
-            promise = this._.api._.graphql.query(this._.args)
+            promise = this._.api._.graphqlClient.query(this._.args)
                 .then((result) => {
                     result = clone(result)
                     this._.api.debug(1, `GraphQL result: ${JSON.stringify(result)}`)
@@ -115,7 +115,7 @@ export default class Query {
         }
         else if (this._.type === "mutation") {
             /*  GraphQL "mutation"  */
-            promise = this._.api._.graphql.mutate(this._.args)
+            promise = this._.api._.graphqlClient.mutate(this._.args)
                 .then((result) => {
                     result = clone(result)
                     this._.api.debug(1, `GraphQL result: ${JSON.stringify(result)}`)
@@ -152,7 +152,7 @@ export default class Query {
         /*  create a Subscription around the Apollo Client "watchQuery" method  */
         this._.api.debug(1, `GraphQL query: ${this._.query.replace(/(?:\s|\r?\n)+/g, " ")}`)
         let subscription = new Subscription(this)
-        let watcher = this._.api._.graphql.watchQuery(this._.args)
+        let watcher = this._.api._.graphqlClient.watchQuery(this._.args)
         subscription._.next = new Promise((resolve, reject) => {
             let first = true
             subscription._.unsubscribe = watcher.subscribe({
