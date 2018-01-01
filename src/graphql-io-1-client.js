@@ -130,9 +130,11 @@ export default class Client extends StdAPI {
             throw new Error("invalid communication mode")
 
         /*  create error handling Apollo Link instance  */
-        this._.graphqlLinkErr = onError(async ({ networkError }) => {
+        this._.graphqlLinkErr = onError(async (error) => {
             /*  auto-logout/login on HTTP 401 responses  */
-            if (networkError.status === 401) {
+            if (   typeof error === "object"
+                && typeof error.networkError === "object"
+                && error.networkError.status === 401) {
                 await this.logout(true)
                 await this.login(true)
             }
