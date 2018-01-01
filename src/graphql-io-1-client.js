@@ -277,6 +277,7 @@ export default class Client extends StdAPI {
             if (typeof err === "object"
                 && err !== null
                 && typeof err.path === "object"
+                && err.path !== null
                 && err.path instanceof Array
                 && typeof err.message === "string")
                 err = `GraphQL error at path ${err.path.join(".")}: ${err.message}`

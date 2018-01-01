@@ -110,7 +110,7 @@ export default class Query {
     }
 
     /*  process Apollo Client result object  */
-    __processResults (result, info) {
+    __processResults (result, info = "") {
         if (   typeof result.errors === "object"
             && result.errors instanceof Array
             && result.errors.length > 0         ) {
