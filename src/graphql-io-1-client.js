@@ -36,7 +36,7 @@ import { InMemoryCache }  from "apollo-cache-inmemory"
 import CrossFetch         from "cross-fetch"
 
 /*  internal dependencies  */
-import Query          from "./graphql-io-2-query"
+import Query              from "./graphql-io-2-query"
 
 /*  the exported API class  */
 export default class Client extends StdAPI {
