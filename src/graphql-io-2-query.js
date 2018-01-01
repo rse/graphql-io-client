@@ -112,6 +112,7 @@ export default class Query {
                 })
                 .catch((err) => {
                     this._.error(err)
+                    throw err
                 })
         }
         else if (this._.type === "mutation") {
@@ -127,13 +128,14 @@ export default class Query {
                 })
                 .catch((err) => {
                     this._.error(err)
+                    throw err
                 })
         }
         return promise
     }
 
     /*  configure multiple-time callback  */
-    subscribe (onResult, onError = (err) => { throw err }) {
+    subscribe (onResult, onError = (err) => {}) {
         /*  sanity check usage  */
         if (typeof onResult !== "function")
             throw new Error("you have to supply a result function")
@@ -192,10 +194,8 @@ export default class Query {
                     /*  pass-through execution to outer callback  */
                     this._.api.debug(1, `GraphQL error: ${JSON.stringify(error)} ` +
                         `(sid: ${subscription._.sid !== "" ? subscription._.sid : "none"})`)
-                    if (onError)
-                        onError(error)
-                    else
-                        this._.error(error)
+                    onError(error)
+                    this._.error(error)
                 }
             })
         })
