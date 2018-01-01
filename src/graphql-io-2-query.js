@@ -86,7 +86,7 @@ export default class Query {
     }
 
     /*  configure one-time callback  */
-    then (onResult, onError = (err) => { throw err }) {
+    then (onResult = (result) => result, onError = (err) => { throw err }) {
         /*  assemble Apollo Client query/mutation arguments  */
         let kind = this._.type === "mutation" ? "mutation" : "query"
         this._.args = Object.assign({
@@ -134,6 +134,8 @@ export default class Query {
     /*  configure multiple-time callback  */
     subscribe (onResult, onError = (err) => { throw err }) {
         /*  sanity check usage  */
+        if (typeof onResult !== "function")
+            throw new Error("you have to supply a result function")
         if (this._.type !== "query")
             throw new Error("you can call \"subscribe\" on GraphQL query operations only")
 
