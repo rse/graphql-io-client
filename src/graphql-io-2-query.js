@@ -92,7 +92,8 @@ export default class Query {
         this._.args = Object.assign({
             [ kind ]:    gql`${this._.query}`,
             variables:   this._.vars,
-            fetchPolicy: "network-only"
+            fetchPolicy: "network-only",
+            errorPolicy: "none"
         }, this._.opts)
 
         /*  just return the Promise of the underlying Apollo Client query/mutate methods  */
@@ -148,6 +149,7 @@ export default class Query {
             query:        gql`${this._.query}`,
             variables:    this._.vars,
             fetchPolicy:  "network-only",
+            errorPolicy:  "none",
             pollInterval: 60 * 1000
         }, this._.opts)
 
