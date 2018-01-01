@@ -274,17 +274,20 @@ export default class Client extends StdAPI {
     /*  query (internal API)  */
     _graphql (type, query, vars = {}, opts = {}) {
         const onError = (err) => {
-            if (   typeof err === "object"
+            if (typeof err === "object"
                 && err !== null
-                && typeof err.graphQLErrors === "object"
-                && err.graphQLErrors instanceof Array   ) {
-                let error = err.graphQLErrors[0]
-                let path = (typeof error.path === "object" && error.path instanceof Array ?
-                    error.path.join(".") : "")
-                this.error(`error at ${path}: ${error.message}`)
-            }
+                && typeof err.path === "object"
+                && err.path instanceof Array
+                && typeof err.message === "string")
+                err = `GraphQL error at path ${err.path.join(".")}: ${err.message}`
+            else if (typeof err === "object"
+                && err !== null
+                && typeof err.message === "string")
+                err = err.message
             else
-                this.error(`${err.message}`)
+                err = err.toString()
+            err = err.replace(/(?:\s|\r?\n)+/g, " ")
+            this.error(err)
         }
         return new Query(this, onError, type, query, vars, opts)
     }

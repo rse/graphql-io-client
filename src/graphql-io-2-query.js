@@ -85,57 +85,80 @@ export default class Query {
         }
     }
 
-    /*  configure one-time callback  */
-    then (onResult = (result) => result, onError = (err) => { throw err }) {
-        /*  assemble Apollo Client query/mutation arguments  */
+    /*  assemble Apollo Client query/mutation arguments  */
+    __assembleArgs (opts = {}) {
+        /*  determine type of operation  */
         let kind = this._.type === "mutation" ? "mutation" : "query"
+
+        /*  convert query from string to AST  */
+        let query
+        try {
+            query = gql`${this._.query}`
+        }
+        catch (err) {
+            return err
+        }
+
+        /*  assemble arguments  */
         this._.args = Object.assign({
-            [ kind ]:    gql`${this._.query}`,
+            [ kind ]:    query,
             variables:   this._.vars,
             fetchPolicy: "network-only",
-            errorPolicy: "none"
-        }, this._.opts)
+            errorPolicy: "all"
+        }, this._.opts, opts)
+        return null
+    }
 
-        /*  just return the Promise of the underlying Apollo Client query/mutate methods  */
-        this._.api.debug(1, `GraphQL query: ${this._.query.replace(/(?:\s|\r?\n)+/g, " ")}`)
-        let promise
-        if (this._.type === "query") {
-            /*  GraphQL "query"  */
-            promise = this._.api._.graphqlClient.query(this._.args)
-                .then((result) => {
-                    result = clone(result)
-                    this._.api.debug(1, `GraphQL result: ${JSON.stringify(result)}`)
-                    return onResult(result)
-                }, (error) => {
-                    this._.api.debug(1, `GraphQL error: ${JSON.stringify(error)}`)
-                    return onError(error)
-                })
-                .catch((err) => {
-                    this._.error(err)
-                    throw err
-                })
+    /*  process Apollo Client result object  */
+    __processResults (result, info) {
+        if (   typeof result.errors === "object"
+            && result.errors instanceof Array
+            && result.errors.length > 0         ) {
+            this._.api.debug(1, `GraphQL response (error): ${JSON.stringify(result)}${info}`)
+            this._.error(result.errors[0])
         }
-        else if (this._.type === "mutation") {
-            /*  GraphQL "mutation"  */
-            promise = this._.api._.graphqlClient.mutate(this._.args)
-                .then((result) => {
-                    result = clone(result)
-                    this._.api.debug(1, `GraphQL result: ${JSON.stringify(result)}`)
-                    return onResult(result)
-                }, (error) => {
-                    this._.api.debug(1, `GraphQL error: ${JSON.stringify(error)}`)
-                    return onError(error)
-                })
-                .catch((err) => {
-                    this._.error(err)
-                    throw err
-                })
+        else
+            this._.api.debug(1, `GraphQL response (success): ${JSON.stringify(result)}${info}`)
+    }
+
+    /*  configure ONE-TIME callback
+        (NOTICE: we accept Promise-like onResult/onError arguments, but ignore onError and
+                 always return a valid to-be-resolved Promise for async/await usage by caller)  */
+    then (onResult /*, onError */) {
+        /*  sanity check usage  */
+        if (typeof onResult !== "function")
+            throw new Error("you have to supply a result function")
+
+        /*  assemble Apollo Client query/mutation arguments  */
+        let err = this.__assembleArgs()
+        if (err !== null) {
+            this._.error(err)
+            return new Promise((resolve /* , reject */) => {
+                resolve(onResult({ data: null, errors: [ err ] }))
+            })
         }
+
+        /*  create a request with the underlying Apollo Client query/mutate method  */
+        let method = (this._.type === "query" ? "query" : "mutate")
+        this._.api.debug(1, `GraphQL request (${method}): ${this._.query.replace(/(?:\s|\r?\n)+/g, " ")}`)
+        let promise = this._.api._.graphqlClient[method](this._.args)
+
+        /*  post-process the result  */
+        promise = promise.then((result) => {
+            return clone(result, false)
+        }, (error) => {
+            if (!(error instanceof Error))
+                error = new Error(error)
+            return { data: null, errors: [ error ] }
+        }).then((result) => {
+            this.__processResults(result)
+            return onResult(result)
+        })
         return promise
     }
 
-    /*  configure multiple-time callback  */
-    subscribe (onResult, onError = (err) => {}) {
+    /*  configure MULTI-TIME callback  */
+    subscribe (onResult) {
         /*  sanity check usage  */
         if (typeof onResult !== "function")
             throw new Error("you have to supply a result function")
@@ -147,18 +170,17 @@ export default class Query {
             "$1 _Subscription { subscribe } ")
 
         /*  assemble Apollo Client watchQuery arguments  */
-        this._.args = Object.assign({
-            query:        gql`${this._.query}`,
-            variables:    this._.vars,
-            fetchPolicy:  "network-only",
-            errorPolicy:  "none",
-            pollInterval: 60 * 1000
-        }, this._.opts)
+        let err = this.__assembleArgs({ pollInterval: 60 * 1000 })
+        if (err !== null) {
+            this._.error(err)
+            return onResult({ data: null, errors: [ err ] })
+        }
 
         /*  create a Subscription around the Apollo Client "watchQuery" method  */
-        this._.api.debug(1, `GraphQL query: ${this._.query.replace(/(?:\s|\r?\n)+/g, " ")}`)
+        this._.api.debug(1, `GraphQL request (query): ${this._.query.replace(/(?:\s|\r?\n)+/g, " ")}`)
         let subscription = new Subscription(this)
         let watcher = this._.api._.graphqlClient.watchQuery(this._.args)
+
         subscription._.next = new Promise((resolve, reject) => {
             let first = true
             subscription._.unsubscribe = watcher.subscribe({
@@ -185,17 +207,17 @@ export default class Query {
                         resolve()
                     }
 
-                    /*  pass-through execution to outer callback  */
-                    this._.api.debug(1, `GraphQL result: ${JSON.stringify(result)} ` +
-                        `(sid: ${subscription._.sid !== "" ? subscription._.sid : "none"})`)
+                    /*  pass-through result to outer handler  */
+                    this.__processResults(result, ` <sid: ${subscription._.sid !== "" ? subscription._.sid : "none"}>`)
                     onResult(result)
                 },
                 error: (error) => {
-                    /*  pass-through execution to outer callback  */
-                    this._.api.debug(1, `GraphQL error: ${JSON.stringify(error)} ` +
-                        `(sid: ${subscription._.sid !== "" ? subscription._.sid : "none"})`)
-                    onError(error)
-                    this._.error(error)
+                    /*  convert error into regular result  */
+                    if (!(error instanceof Error))
+                        error = new Error(error)
+                    let result = { data: null, errors: [ error ] }
+                    this.__processResults(result, ` <sid: ${subscription._.sid !== "" ? subscription._.sid : "none"}>`)
+                    onResult(result)
                 }
             })
         })
