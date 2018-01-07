@@ -112,13 +112,11 @@ export default class Client extends StdAPI {
                 this.debug(2 + level, `[apollo-client-ws]: ${msg}`)
             })
 
-            /*  detect and pass-through connect/disconnect situations  */
-            this._.graphqlLinkNet.on("connect", () => {
-                this.emit("connect")
-            })
-            this._.graphqlLinkNet.on("disconnect", () => {
-                this.emit("disconnect")
-            })
+            /*  detect and pass-through some events  */
+            this._.graphqlLinkNet.on("connect",    () => { this.emit("connect") })
+            this._.graphqlLinkNet.on("disconnect", () => { this.emit("disconnect") })
+            this._.graphqlLinkNet.on("open",       () => { this.emit("open") })
+            this._.graphqlLinkNet.on("close",      () => { this.emit("close") })
 
             /*  hook into WebSocket creation to send authentication cookie and peer id
                 (Notice: called under Node environment only, but for Browser
