@@ -139,12 +139,17 @@ export default class Client extends StdAPI {
 
         /*  create error handling Apollo Link instance  */
         this._.graphqlLinkErr = onError(async (error) => {
-            /*  auto-logout/login on HTTP 401 responses  */
             if (   typeof error === "object"
                 && typeof error.networkError === "object"
                 && error.networkError.status === 401) {
+                /*  auto-logout/login on HTTP 401 responses  */
                 await this.logout(true)
                 await this.login(true)
+            }
+            else if (   typeof error === "object"
+                     && typeof error.networkError === "object") {
+                /*  pass-through all other network errors  */
+                this.error(`network error: ${error.networkError.toString()}`)
             }
         })
 
