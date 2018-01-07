@@ -113,10 +113,10 @@ export default class Client extends StdAPI {
             })
 
             /*  detect and pass-through connect/disconnect situations  */
-            this._.graphqlLinkNet.at("connect", () => {
+            this._.graphqlLinkNet.on("connect", () => {
                 this.emit("connect")
             })
-            this._.graphqlLinkNet.at("disconnect", () => {
+            this._.graphqlLinkNet.on("disconnect", () => {
                 this.emit("disconnect")
             })
 
