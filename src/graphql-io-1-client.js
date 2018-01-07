@@ -304,7 +304,7 @@ export default class Client extends StdAPI {
         return Axios.get(`${this.$.url}${this.$.path.blob}/${name}`).then((data) => {
             return data
         }, (err) => {
-            this.error(`fetchin of BLOB "${name}" failed: ${err}`)
+            this.error(`fetching of BLOB "${name}" failed: ${err}`)
             return null
         })
     }
