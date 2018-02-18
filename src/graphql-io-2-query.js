@@ -100,7 +100,7 @@ export default class Query {
         }
 
         /*  assemble arguments  */
-        this._.args = Object.assign({
+        this._.args = Object.assign({}, {
             [ kind ]:    query,
             variables:   this._.vars,
             fetchPolicy: "network-only",
