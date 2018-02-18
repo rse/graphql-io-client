@@ -46,6 +46,13 @@ export default class Subscription {
         return this._.state
     }
 
+    /*  force refetching of subscription  */
+    refetch () {
+        return (this._.next = this._.next.then(() => {
+            return this._.query._.api._.subscriptions[this._.sid].refetch()
+        }))
+    }
+
     /*  pause subscription  */
     pause () {
         return (this._.next = this._.next.then(() => {
