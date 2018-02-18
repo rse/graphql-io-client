@@ -150,6 +150,9 @@ declare module "graphql-io-client" {
         /*  Return current state of subscription ("unsubscribed", "subscribed", "paused")  */
         state(): string
 
+        /*  Manually force re-execution of the query.  */
+        refetch(): Promise<boolean>
+
         /*  Pause the subscription at the server.  */
         pause(): Promise<boolean>
 
