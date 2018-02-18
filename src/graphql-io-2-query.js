@@ -59,6 +59,7 @@ export default class Query {
         this._.error = error
         this._.type  = type
         this._.query = query
+        this._.ast   = null
         this._.vars  = vars
         this._.opts  = opts
 
@@ -85,29 +86,30 @@ export default class Query {
         }
     }
 
+    /*  compile GraphQL query AST  */
+    __compileAST () {
+        /*  convert GraphQL query from string to AST  */
+        try {
+            this._.ast = gql`${this._.query}`
+        }
+        catch (err) {
+            return err
+        }
+        return null
+    }
+
     /*  assemble Apollo Client query/mutation arguments  */
     __assembleArgs (opts = {}) {
         /*  determine type of operation  */
         let kind = this._.type === "mutation" ? "mutation" : "query"
 
-        /*  convert query from string to AST  */
-        let query
-        try {
-            query = gql`${this._.query}`
-        }
-        catch (err) {
-            return err
-        }
-
         /*  assemble arguments  */
-        this._.args = Object.assign({}, {
-            [ kind ]:    query,
+        return Object.assign({}, {
+            [ kind ]:    this._.ast,
             variables:   this._.vars,
             fetchPolicy: this._.type === "mutation" ? "no-cache" : "network-only",
-            ssr:         false, /*  workaround to force network-only  */
             errorPolicy: "all"
         }, this._.opts, opts)
-        return null
     }
 
     /*  process Apollo Client result object  */
@@ -130,8 +132,8 @@ export default class Query {
         if (typeof onResult !== "function")
             throw new Error("you have to supply a result function")
 
-        /*  assemble Apollo Client query/mutation arguments  */
-        let err = this.__assembleArgs()
+        /*  compile GraphQL query  */
+        let err = this.__compileAST()
         if (err !== null) {
             this._.error(err)
             return new Promise((resolve /* , reject */) => {
@@ -142,7 +144,8 @@ export default class Query {
         /*  create a request with the underlying Apollo Client query/mutate method  */
         let method = (this._.type === "query" ? "query" : "mutate")
         this._.api.debug(1, `GraphQL request (${method}): ${this._.query.replace(/(?:\s|\r?\n)+/g, " ")}`)
-        let promise = this._.api._.graphqlClient[method](this._.args)
+        let args = this.__assembleArgs()
+        let promise = this._.api._.graphqlClient[method](args)
 
         /*  post-process the result  */
         promise = promise.then((result) => {
@@ -170,59 +173,18 @@ export default class Query {
         this._.query = this._.query.replace(/^(\s*query.*?\{)/,
             "$1 _Subscription { subscribe } ")
 
-        /*  assemble Apollo Client watchQuery arguments  */
-        let err = this.__assembleArgs({ pollInterval: 60 * 1000 })
+        /*  compile GraphQL query  */
+        let err = this.__compileAST()
         if (err !== null) {
             this._.error(err)
             onResult({ data: null, errors: [ err ] })
             return
         }
 
-        /*  create a Subscription around the Apollo Client "watchQuery" method  */
+        /*  create a Subscription around the Apollo Client query method  */
         this._.api.debug(1, `GraphQL request (query): ${this._.query.replace(/(?:\s|\r?\n)+/g, " ")}`)
-        let subscription = new Subscription(this)
-        let watcher = this._.api._.graphqlClient.watchQuery(this._.args)
-
-        subscription._.next = new Promise((resolve, reject) => {
-            let first = true
-            subscription._.unsubscribe = watcher.subscribe({
-                next: (result) => {
-                    /*  clone data structure  */
-                    result = clone(result, false)
-
-                    /*  extract subscription id from "_Subscription.subscribe" field  */
-                    if (   typeof result === "object"
-                        && result !== null
-                        && typeof result.data === "object"
-                        && result.data !== null
-                        && typeof result.data._Subscription === "object"
-                        && result.data._Subscription !== null
-                        && typeof result.data._Subscription.subscribe === "string") {
-                        subscription._.sid = result.data._Subscription.subscribe
-                        this._.api._.subscriptions[subscription._.sid] = watcher
-                        delete result.data._Subscription
-                    }
-
-                    /*  optionally resolve this "next" promise initially  */
-                    if (first) {
-                        first = false
-                        resolve()
-                    }
-
-                    /*  pass-through result to outer handler  */
-                    this.__processResults(result, ` <sid: ${subscription._.sid !== "" ? subscription._.sid : "none"}>`)
-                    onResult(result)
-                },
-                error: (error) => {
-                    /*  convert error into regular result  */
-                    if (!(error instanceof Error))
-                        error = new Error(error)
-                    let result = { data: null, errors: [ error ] }
-                    this.__processResults(result, ` <sid: ${subscription._.sid !== "" ? subscription._.sid : "none"}>`)
-                    onResult(result)
-                }
-            })
-        })
+        let subscription = new Subscription(this, onResult)
+        subscription.refetch()
         return subscription
     }
 }

@@ -22,9 +22,12 @@
 **  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/*  external dependencies  */
+import clone from "clone"
+
 /*  the Subscription class  */
 export default class Subscription {
-    constructor (query) {
+    constructor (query, onResult) {
         /*  define internal state  */
         Object.defineProperty(this, "_", {
             configurable: false,
@@ -35,10 +38,10 @@ export default class Subscription {
 
         /*  remember internal state  */
         this._.query       = query
+        this._.onResult    = onResult
         this._.state       = "subscribed"
         this._.sid         = ""
-        this._.unsubscribe = null
-        this._.next        = null
+        this._.next        = Promise.resolve()
     }
 
     /*  check status  */
@@ -49,7 +52,36 @@ export default class Subscription {
     /*  force refetching of subscription  */
     refetch () {
         return (this._.next = this._.next.then(() => {
-            return this._.query._.api._.subscriptions[this._.sid].refetch()
+            if (this._.state !== "subscribed")
+                throw new Error(`query not active (currently in "${this._.state}" state)`)
+            let args = this._.query.__assembleArgs()
+            let promise = this._.query._.api._.graphqlClient.query(args)
+            return promise.then((result) => {
+                /*  clone data structure  */
+                result = clone(result, false)
+
+                /*  extract subscription id from "_Subscription.subscribe" field  */
+                if (   typeof result === "object"
+                    && result !== null
+                    && typeof result.data === "object"
+                    && result.data !== null
+                    && typeof result.data._Subscription === "object"
+                    && result.data._Subscription !== null
+                    && typeof result.data._Subscription.subscribe === "string") {
+                    this._.sid = result.data._Subscription.subscribe
+                    this._.query._.api._.subscriptions[this._.sid] = this
+                    delete result.data._Subscription
+                }
+                return result
+            }, (error) => {
+                if (!(error instanceof Error))
+                    error = new Error(error)
+                return { data: null, errors: [ error ] }
+            }).then((result) => {
+                this._.query.__processResults(result, ` <sid: ${this._.sid !== "" ? this._.sid : "none"}>`)
+                this._.onResult(result)
+                return true
+            })
         }))
     }
 
@@ -90,8 +122,6 @@ export default class Subscription {
                 _Subscription { unsubscribe(sid: $sid) }
             }`, { sid: this._.sid }).then(() => {
                 delete this._.query._.api._.subscriptions[this._.sid]
-                if (this._.unsubscribe !== null)
-                    this._.unsubscribe.unsubscribe()
                 this._.state = "unsubscribed"
                 return true
             })
