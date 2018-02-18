@@ -174,7 +174,8 @@ export default class Query {
         let err = this.__assembleArgs({ pollInterval: 60 * 1000 })
         if (err !== null) {
             this._.error(err)
-            return onResult({ data: null, errors: [ err ] })
+            onResult({ data: null, errors: [ err ] })
+            return
         }
 
         /*  create a Subscription around the Apollo Client "watchQuery" method  */
