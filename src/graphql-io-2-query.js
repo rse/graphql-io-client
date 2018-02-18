@@ -104,6 +104,7 @@ export default class Query {
             [ kind ]:    query,
             variables:   this._.vars,
             fetchPolicy: this._.type === "mutation" ? "no-cache" : "network-only",
+            ssr:         false, /*  workaround to force network-only  */
             errorPolicy: "all"
         }, this._.opts, opts)
         return null
