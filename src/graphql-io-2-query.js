@@ -103,7 +103,7 @@ export default class Query {
         this._.args = Object.assign({}, {
             [ kind ]:    query,
             variables:   this._.vars,
-            fetchPolicy: "network-only",
+            fetchPolicy: this._.type === "mutation" ? "no-cache" : "network-only",
             errorPolicy: "all"
         }, this._.opts, opts)
         return null
