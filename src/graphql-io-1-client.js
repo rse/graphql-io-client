@@ -196,6 +196,15 @@ export default class Client extends StdAPI {
             })
         }
 
+        /*  refetch active subscriptions on open/close messages  */
+        if (this.$.mode === "websocket") {
+            this._.graphqlLinkNet.on("open", () => {
+                Object.keys(this._.subscriptions).forEach((sid) => {
+                    this._.subscriptions[sid].refetch()
+                })
+            })
+        }
+
         /*  perform an initial connect  */
         if (this.$.mode === "websocket")
             await this._.graphqlLinkNet.connect()
