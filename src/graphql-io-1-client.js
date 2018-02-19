@@ -84,7 +84,7 @@ export default class Client extends StdAPI {
 
         /*  create networking Apollo Link instance  */
         if (this.$.mode === "http") {
-            /*  create HTTP-based interface  */
+            /*  create HTTP-based interface (not recommended)  */
             this.debug(3, "create HTTP-based network interface")
             this._.graphqlLinkNet = new HttpLink({
                 uri: `${this.$.url}${this.$.path.graph}`,
@@ -95,7 +95,7 @@ export default class Client extends StdAPI {
             })
         }
         else if (this.$.mode === "websocket") {
-            /*  create WebSocket-based interface  */
+            /*  create WebSocket-based interface (recommended)  */
             this.debug(3, "create WebSocket-based network interface")
             this._.graphqlLinkNet = new ApolloClientWS({
                 uri: `${this.$.url.replace(/^http(s?):/, "ws$1:")}${this.$.path.graph}`,
@@ -107,7 +107,7 @@ export default class Client extends StdAPI {
                 }
             })
 
-            /*  pass-through debug messages  */
+            /*  pass-through Apollo-Client-WS debug messages  */
             this._.graphqlLinkNet.on("debug", ({ date, level, msg, log }) => {
                 this.debug(2 + level, `[apollo-client-ws]: ${msg}`)
             })
