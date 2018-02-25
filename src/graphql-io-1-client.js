@@ -187,9 +187,12 @@ export default class Client extends StdAPI {
                 if (type === "GRAPHQL-NOTIFY" && Ducky.validate(data, "[ string* ]")) {
                     this.debug(1, `GraphQL notification for subscriptions: ${data.join(", ")}`)
                     data.forEach((sid) => {
-                        if (typeof this._.subscriptions[sid] === "object") {
-                            this.debug(2, `refetch query of subscription ${sid}`)
-                            this._.subscriptions[sid].refetch()
+                        if (this._.subscriptions[sid] !== undefined) {
+                            this.debug(2, `refetch query of subscription ${sid} ` +
+                                `(instances: ${Object.keys(this._.subscriptions[sid]).length})`)
+                            Object.keys(this._.subscriptions[sid]).forEach((iid) => {
+                                this._.subscriptions[sid][iid].refetch()
+                            })
                         }
                     })
                 }
@@ -200,7 +203,11 @@ export default class Client extends StdAPI {
         if (this.$.mode === "websocket") {
             this._.graphqlLinkNet.on("open", () => {
                 Object.keys(this._.subscriptions).forEach((sid) => {
-                    this._.subscriptions[sid].refetch()
+                    this.debug(2, `refetch query of subscription ${sid} ` +
+                        `(instances: ${Object.keys(this._.subscriptions[sid]).length})`)
+                    Object.keys(this._.subscriptions[sid]).forEach((iid) => {
+                        this._.subscriptions[sid][iid].refetch()
+                    })
                 })
             })
         }

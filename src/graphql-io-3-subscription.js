@@ -23,6 +23,7 @@
 */
 
 /*  external dependencies  */
+import UUID  from "pure-uuid"
 import clone from "clone"
 
 /*  the Subscription class  */
@@ -40,6 +41,7 @@ export default class Subscription {
         this._.query       = query
         this._.onResult    = onResult
         this._.state       = "subscribed"
+        this._.iid         = (new UUID(1)).format()
         this._.sid         = ""
         this._.next        = Promise.resolve()
     }
@@ -69,7 +71,9 @@ export default class Subscription {
                     && result.data._Subscription !== null
                     && typeof result.data._Subscription.subscribe === "string") {
                     this._.sid = result.data._Subscription.subscribe
-                    this._.query._.api._.subscriptions[this._.sid] = this
+                    if (this._.query._.api._.subscriptions[this._.sid] === undefined)
+                        this._.query._.api._.subscriptions[this._.sid] = {}
+                    this._.query._.api._.subscriptions[this._.sid][this._.iid] = this
                     delete result.data._Subscription
                 }
                 return result
@@ -121,7 +125,9 @@ export default class Subscription {
             return this._.query._.api.graphql(`mutation ($sid: UUID!) {
                 _Subscription { unsubscribe(sid: $sid) }
             }`, { sid: this._.sid }).then(() => {
-                delete this._.query._.api._.subscriptions[this._.sid]
+                delete this._.query._.api._.subscriptions[this._.sid][this._.iid]
+                if (Object.keys(this._.query._.api._.subscriptions[this._.sid]).length === 0)
+                    delete this._.query._.api._.subscriptions[this._.sid]
                 this._.state = "unsubscribed"
                 return true
             })
