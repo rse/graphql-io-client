@@ -53,7 +53,15 @@ module.exports = function (grunt) {
                 options: {
                     transform: [
                         [ "babelify", {
-                            presets: [ "es2015", "es2016", "es2017", "stage-3", "stage-2" ],
+                            presets: [
+                                [ "env", {
+                                    "targets": {
+                                        "browser": [ "last 2 versions" ]
+                                    }
+                                } ],
+                                "stage-3",
+                                "stage-2"
+                            ],
                             plugins: [ [ "transform-runtime", {
                                 "polyfill":    true,
                                 "regenerator": true
@@ -91,8 +99,6 @@ module.exports = function (grunt) {
                                 "node": 6.0
                             }
                         } ],
-                        "es2016",
-                        "es2017",
                         "stage-3",
                         "stage-2"
                     ],
