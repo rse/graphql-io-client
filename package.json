@@ -1,6 +1,6 @@
 {
     "name":        "graphql-io-client",
-    "version":     "0.9.58",
+    "version":     "0.9.59",
     "description": "GraphQL Network Communication Framework (Client)",
     "keywords":    [ "graphql", "network", "communication", "framework", "client" ],
     "browser":     "./lib/browser/graphql-io.js",
