@@ -143,7 +143,9 @@ export default class Query {
 
         /*  create a request with the underlying Apollo Client query/mutate method  */
         let method = (this._.type === "query" ? "query" : "mutate")
-        this._.api.debug(1, `GraphQL request (${method}): ${this._.query.replace(/(?:\s|\r?\n)+/g, " ")}`)
+        this._.api.debug(1, `GraphQL request (${method}): ` +
+            `query: ${JSON.stringify(this._.query)}, ` +
+            `variables: ${JSON.stringify(this._.vars)}`)
         let args = this.__assembleArgs()
         let promise = this._.api._.graphqlClient[method](args)
 
@@ -182,7 +184,9 @@ export default class Query {
         }
 
         /*  create a Subscription around the Apollo Client query method  */
-        this._.api.debug(1, `GraphQL request (query): ${this._.query.replace(/(?:\s|\r?\n)+/g, " ")}`)
+        this._.api.debug(1, "GraphQL request (query): " +
+            `query: ${JSON.stringify(this._.query)}, ` +
+            `variables: ${JSON.stringify(this._.vars)}`)
         let subscription = new Subscription(this, onResult)
         subscription.refetch()
         return subscription
