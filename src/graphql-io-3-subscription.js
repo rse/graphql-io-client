@@ -54,9 +54,9 @@ export default class Subscription {
     /*  force refetching of subscription  */
     refetch () {
         return (this._.next = this._.next.then(() => {
-            if (     this._.state !== "subscribed"
-                && (!this._.query._.api._.subscriptions[this._.sid]
-                ||  !this._.query._.api._.subscriptions[this._.sid][this._.iid]))
+            if (   this._.state !== "subscribed"
+                && (   !this._.query._.api._.subscriptions[this._.sid]
+                    || !this._.query._.api._.subscriptions[this._.sid][this._.iid]))
                 return
             if (this._.state !== "subscribed")
                 throw new Error(`query not active (currently in "${this._.state}" state)`)
