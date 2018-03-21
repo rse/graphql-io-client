@@ -30,6 +30,7 @@
         "apollo-cache-inmemory":          "1.1.11",
         "cross-fetch":                    "2.1.0",
         "axios":                          "0.18.0",
+        "es6-promise":                    "4.2.4",
         "pure-uuid":                      "1.5.0",
         "ducky":                          "2.6.4",
         "clone":                          "2.1.1"
@@ -46,6 +47,7 @@
         "tslint":                         "5.9.1",
         "typescript":                     "2.7.2",
         "browserify":                     "16.1.1",
+        "global-replaceify":              "1.0.0",
         "babelify":                       "8.0.0",
         "babel-core":                     "6.26.0",
         "babel-preset-env":               "1.6.1",

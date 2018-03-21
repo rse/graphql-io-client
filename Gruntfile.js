@@ -52,6 +52,12 @@ module.exports = function (grunt) {
                 },
                 options: {
                     transform: [
+                        [ "global-replaceify", {
+                            global: true,
+                            replacements: {
+                                "Promise": "require('es6-promise').Promise"
+                            }
+                        } ],
                         [ "babelify", {
                             presets: [
                                 [ "env", {
