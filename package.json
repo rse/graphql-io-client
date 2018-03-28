@@ -20,19 +20,19 @@
     "browserify-shim": {
     },
     "dependencies": {
-        "stdapi":                         "0.9.7",
+        "stdapi":                         "1.0.0",
         "graphql-tag":                    "2.8.0",
-        "apollo-client":                  "2.2.7",
-        "apollo-client-ws":               "2.1.1",
+        "apollo-client":                  "2.2.8",
+        "apollo-client-ws":               "2.1.2",
         "apollo-link":                    "1.2.1",
         "apollo-link-http":               "1.5.3",
         "apollo-link-error":              "1.0.7",
-        "apollo-cache-inmemory":          "1.1.11",
+        "apollo-cache-inmemory":          "1.1.12",
         "cross-fetch":                    "2.1.0",
         "axios":                          "0.18.0",
         "es6-promise":                    "4.2.4",
         "pure-uuid":                      "1.5.0",
-        "ducky":                          "2.6.4",
+        "ducky":                          "2.6.5",
         "clone":                          "2.1.1"
     },
     "devDependencies": {
@@ -45,7 +45,7 @@
         "grunt-babel":                    "7.0.0",
         "grunt-tslint":                   "5.0.1",
         "tslint":                         "5.9.1",
-        "typescript":                     "2.7.2",
+        "typescript":                     "2.8.1",
         "browserify":                     "16.1.1",
         "global-replaceify":              "1.0.0",
         "babelify":                       "8.0.0",
