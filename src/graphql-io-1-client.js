@@ -236,7 +236,7 @@ export default class Client extends StdAPI {
 
     /*  perform a login  */
     async login (implicit = false) {
-        this.debug(2, `login at backend (${implicit ? "implicitly" : "explicit"})`)
+        this.debug(2, `login at backend (${implicit ? "implicitly" : "explicitly"})`)
 
         /*  determine credentials  */
         if (!implicit) {
@@ -274,7 +274,7 @@ export default class Client extends StdAPI {
 
     /*  perform a logout  */
     logout (implicit = false) {
-        this.debug(2, `logout at backend (${implicit ? "implicitly" : "explicit"})`)
+        this.debug(2, `logout at backend (${implicit ? "implicitly" : "explicitly"})`)
         return Axios.get(`${this.$.url}${this.$.path.logout}`).then(() => {
             this._.loginUsername = null
             this._.loginPassword = null
