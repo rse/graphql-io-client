@@ -136,12 +136,12 @@ declare module "graphql-io-client" {
         before it is actually executed.  */
     interface Query {
         /*  Once execute the query as a regular GraphQL query or mutation.  */
-        then(onResult: (result: Result) => any, onError?: (error: Error) => any): Promise<Result>
+        then(onResult: (result: Result) => any): Promise<Result>
 
         /*  Once execute the query as a regular GraphQL query, subscribe
             for any further changes and re-execute the query again on
             each change notification received from the server.  */
-        subscribe(onResult: (result: Result) => void, onError?: (error: Error) => void): Subscription
+        subscribe(onResult: (result: Result) => void): Subscription
     }
 
     /*  The secondary interface for representing a GraphQL query subscription in order
