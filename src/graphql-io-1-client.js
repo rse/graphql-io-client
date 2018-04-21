@@ -300,6 +300,23 @@ export default class Client extends StdAPI {
 
     /*  query (internal API)  */
     _graphql (type, query, vars = {}, opts = {}) {
+        /*  sanity check options  */
+        let err = []
+        if (!Ducky.validate(opts, `{
+            errorsEmit?: boolean,
+            errorsPass?: boolean,
+            dataStrict?: boolean
+        }`, err))
+            throw new Error(`invalid options: ${err.join("; ")}`)
+
+        /*  provide defaults for options  */
+        opts = Object.assign({}, {
+            errorsEmit: true,
+            errorsPass: true,
+            dataStrict: false
+        }, opts)
+
+        /*  provide a smart intermediate error handler  */
         const onError = (err) => {
             if (typeof err === "object"
                 && err !== null
@@ -315,8 +332,11 @@ export default class Client extends StdAPI {
             else
                 err = err.toString()
             err = err.replace(/(?:\s|\r?\n)+/g, " ")
-            this.error(err)
+            if (opts.errorsEmit)
+                this.error(err)
         }
+
+        /*  create and return a new query object  */
         return new Query(this, onError, type, query, vars, opts)
     }
 

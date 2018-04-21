@@ -109,7 +109,7 @@ export default class Query {
             variables:   this._.vars,
             fetchPolicy: this._.type === "mutation" ? "no-cache" : "network-only",
             errorPolicy: "all"
-        }, this._.opts, opts)
+        }, opts)
     }
 
     /*  process Apollo Client result object  */
@@ -158,7 +158,19 @@ export default class Query {
             return { data: null, errors: [ error ] }
         }).then((result) => {
             this.__processResults(result)
-            return onResult(result)
+            let anyData   = !!(result.data)
+            let anyErrors = !!(result.errors)
+            if (anyData && anyErrors && this._.opts.dataStrict) {
+                result.data = null
+                anyData = false
+            }
+            if (anyErrors && !this._.opts.errorsPass) {
+                delete result.errors
+                anyErrors = false
+            }
+            if (anyData || anyErrors)
+                result = onResult(result)
+            return result
         })
         return promise
     }
