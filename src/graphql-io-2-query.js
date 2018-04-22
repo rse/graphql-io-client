@@ -115,22 +115,12 @@ export default class Query {
 
     /*  process Apollo Client result object  */
     __processResults (result, onResult, info = "") {
-        /*  optionally emit errors  */
-        if (   typeof result.errors === "object"
-            && result.errors instanceof Array
-            && result.errors.length > 0         ) {
-            this._.api.debug(1, `GraphQL response (error): ${JSON.stringify(result)}${info}`)
-            this._.error(result.errors[0])
-        }
-        else
-            this._.api.debug(1, `GraphQL response (success): ${JSON.stringify(result)}${info}`)
-
         /*  determine whether there is any data and/or errors  */
         let anyData   = !!(result.data)
         let anyErrors = !!(result.errors)
 
         /*  optionally perform data structure validation  */
-        if (this._.opts.dataRequire) {
+        if (this._.opts.dataRequire !== null) {
             let errors = []
             if (!Ducky.validate.execute(result.data, this._.opts.dataRequire, errors)) {
                 if (!anyErrors) {
@@ -142,6 +132,16 @@ export default class Query {
                 })
             }
         }
+
+        /*  optionally emit errors  */
+        if (   typeof result.errors === "object"
+            && result.errors instanceof Array
+            && result.errors.length > 0         ) {
+            this._.api.debug(1, `GraphQL response (error): ${JSON.stringify(result)}${info}`)
+            this._.error(result.errors[0])
+        }
+        else
+            this._.api.debug(1, `GraphQL response (success): ${JSON.stringify(result)}${info}`)
 
         /*  optionally enforce strict data  */
         if (anyData && anyErrors && this._.opts.dataStrict) {
