@@ -26,7 +26,7 @@
     and its secondary interfaces Query, Subscription and Result.  */
 declare module "graphql-io-client" {
     /*  The primary API class of GraphQL-IO Client,
-     *  representing the network communication client.  */
+        representing the network communication client.  */
     class Client {
         /*  Construct a new GraphQL-IO Client instance.  */
         public constructor(options?: {
@@ -121,21 +121,31 @@ declare module "graphql-io-client" {
         /*  Send a GraphQL **query** (with optional **variables**) to the server.
             For GraphQL query, operation, the **query** parameter can have the operation prefix
             `query` omitted. For GraphQL mutation operation, the **query** parameter has to start
-            with the operation prefix `mutation`. The **options** parameter accepts an object with
-            the following optional boolean fields: `errorsEmit` (default `true`) for enabling/disabling
-            the emitting of GraphQL errors via the `error` event, `errorsPass` (default `true`) for
-            passing the errors via the result `errors` field, `dataStrict` (default `false`) for causing
-            the `data` field to be `null` in case of any errors and `dataRequire` (default `null`)
-            for validating the `data` field against a DuckyJS specification. Set `errorsPass` and
-            `dataStrict` both to `true` for ensuring that the callback in methods `then()` and
-            `subscribe()` are either called with a `data` field or not at all.  */
-        public graphql(query: string, variables?: object, options?: object): Query
+            with the operation prefix `mutation`.  */
+        public graphql(query: string, variables?: object, options?: Options): Query
 
         /*  Convenient short-hand method for `graphql("query [...]"[, ...])`.  */
-        public query(query: string, variables?: object, options?: object): Query
+        public query(query: string, variables?: object, options?: Options): Query
 
         /*  Convenient short-hand method for `graphql("mutation [...]"[, ...])`.  */
-        public mutation(query: string, variables?: object, options?: object): Query
+        public mutation(query: string, variables?: object, options?: Options): Query
+    }
+
+    /*  The options for methods `graphql()`, `query()` and `mutation()`:
+        Set `errorsPass` and `dataStrict` both to `true` for ensuring that the callback in methods
+        `then()` and `subscribe()` are either called with a `data` field or not at all.  */
+    interface Options {
+        /*  Enable/disable the emitting of GraphQL errors via `error` event (default `true`).  */
+        errorsEmit?: boolean
+
+        /*  Enable/disable passing errors via the GraphQL result `errors` field (default `true`).  */
+        errorsPass?: boolean
+
+        /*  Enable/disable causing the `data` field to be `null` in case of any errors (default `false`).  */
+        dataStrict?: boolean
+
+        /*  DuckaJS specification for validating the GraphQL result field `data` (default `null`).  */
+        dataRequire?: string
     }
 
     /*  The secondary interface for representing a GraphQL query or mutation
