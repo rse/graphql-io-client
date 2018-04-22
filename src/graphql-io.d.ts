@@ -124,10 +124,11 @@ declare module "graphql-io-client" {
             with the operation prefix `mutation`. The **options** parameter accepts an object with
             the following optional boolean fields: `errorsEmit` (default `true`) for enabling/disabling
             the emitting of GraphQL errors via the `error` event, `errorsPass` (default `true`) for
-            passing the errors via the result `errors` field and `dataStrict` (default `false`) for causing
-            the `data` field to be `null` in case of any errors. Set `errorsPass` and `dataStrict` both to
-            `true` for ensuring that the callback in methods `then()` and `subscribe()` are either called
-            with a `data` field or not at all.  */
+            passing the errors via the result `errors` field, `dataStrict` (default `false`) for causing
+            the `data` field to be `null` in case of any errors and `dataRequire` (default `null`)
+            for validating the `data` field against a DuckyJS specification. Set `errorsPass` and
+            `dataStrict` both to `true` for ensuring that the callback in methods `then()` and
+            `subscribe()` are either called with a `data` field or not at all.  */
         public graphql(query: string, variables?: object, options?: object): Query
 
         /*  Convenient short-hand method for `graphql("query [...]"[, ...])`.  */
