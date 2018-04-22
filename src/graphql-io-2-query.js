@@ -25,6 +25,7 @@
 /*  external dependencies  */
 import clone        from "clone"
 import gql          from "graphql-tag"
+import Ducky        from "ducky"
 
 /*  internal dependencies  */
 import Subscription from "./graphql-io-3-subscription"
@@ -113,7 +114,8 @@ export default class Query {
     }
 
     /*  process Apollo Client result object  */
-    __processResults (result, info = "") {
+    __processResults (result, onResult, info = "") {
+        /*  optionally emit errors  */
         if (   typeof result.errors === "object"
             && result.errors instanceof Array
             && result.errors.length > 0         ) {
@@ -122,6 +124,42 @@ export default class Query {
         }
         else
             this._.api.debug(1, `GraphQL response (success): ${JSON.stringify(result)}${info}`)
+
+        /*  determine whether there is any data and/or errors  */
+        let anyData   = !!(result.data)
+        let anyErrors = !!(result.errors)
+
+        /*  optionally perform data structure validation  */
+        if (this._.opts.dataRequire) {
+            let errors = []
+            if (!Ducky.validate.execute(result.data, this._.opts.dataRequire, errors)) {
+                if (!anyErrors) {
+                    result.errors = []
+                    anyErrors = true
+                }
+                errors.forEach((error) => {
+                    result.errors.push({ message: error })
+                })
+            }
+        }
+
+        /*  optionally enforce strict data  */
+        if (anyData && anyErrors && this._.opts.dataStrict) {
+            result.data = null
+            anyData = false
+        }
+
+        /*  optionally do not pass-through errors  */
+        if (anyErrors && !this._.opts.errorsPass) {
+            delete result.errors
+            anyErrors = false
+        }
+
+        /*  process results only if there is (still) any data and/or errors  */
+        if (anyData || anyErrors)
+            result = onResult(result)
+
+        return result
     }
 
     /*  configure ONE-TIME callback
@@ -157,20 +195,7 @@ export default class Query {
                 error = new Error(error)
             return { data: null, errors: [ error ] }
         }).then((result) => {
-            this.__processResults(result)
-            let anyData   = !!(result.data)
-            let anyErrors = !!(result.errors)
-            if (anyData && anyErrors && this._.opts.dataStrict) {
-                result.data = null
-                anyData = false
-            }
-            if (anyErrors && !this._.opts.errorsPass) {
-                delete result.errors
-                anyErrors = false
-            }
-            if (anyData || anyErrors)
-                result = onResult(result)
-            return result
+            return this.__processResults(result, onResult)
         })
         return promise
     }

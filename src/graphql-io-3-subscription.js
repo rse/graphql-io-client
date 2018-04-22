@@ -86,19 +86,8 @@ export default class Subscription {
                     error = new Error(error)
                 return { data: null, errors: [ error ] }
             }).then((result) => {
-                this._.query.__processResults(result, ` <sid: ${this._.sid !== "" ? this._.sid : "none"}>`)
-                let anyData   = !!(result.data)
-                let anyErrors = !!(result.errors)
-                if (anyData && anyErrors && this._.query._.opts.dataStrict) {
-                    result.data = null
-                    anyData = false
-                }
-                if (anyErrors && !this._.query._.opts.errorsPass) {
-                    delete result.errors
-                    anyErrors = false
-                }
-                if (anyData || anyErrors)
-                    void this._.onResult(result)
+                void this._.query.__processResults(result, this._.onResult,
+                    ` <sid: ${this._.sid !== "" ? this._.sid : "none"}>`)
                 return true
             })
         }))

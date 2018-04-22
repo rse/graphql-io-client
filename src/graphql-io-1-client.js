@@ -305,16 +305,28 @@ export default class Client extends StdAPI {
         if (!Ducky.validate(opts, `{
             errorsEmit?: boolean,
             errorsPass?: boolean,
-            dataStrict?: boolean
+            dataStrict?: boolean,
+            dataRequire?: string
         }`, err))
             throw new Error(`invalid options: ${err.join("; ")}`)
 
         /*  provide defaults for options  */
         opts = Object.assign({}, {
-            errorsEmit: true,
-            errorsPass: true,
-            dataStrict: false
+            errorsEmit:  true,
+            errorsPass:  true,
+            dataStrict:  false,
+            dataRequire: null
         }, opts)
+
+        /*  optionally compile data requirement specification  */
+        if (opts.dataRequire !== null) {
+            try {
+                opts.dataRequire = Ducky.validate.compile(opts.dataRequire)
+            }
+            catch (ex) {
+                throw new Error(`invalid dataRequire option: ${ex}`)
+            }
+        }
 
         /*  provide a smart intermediate error handler  */
         const onError = (err) => {
