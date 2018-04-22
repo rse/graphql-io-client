@@ -102,7 +102,7 @@ module.exports = function (grunt) {
                     presets: [
                         [ "env", {
                             "targets": {
-                                "node": 6.0
+                                "node": "6.0"
                             }
                         } ],
                         "stage-3",
