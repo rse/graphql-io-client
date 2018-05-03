@@ -34,6 +34,8 @@ import { HttpLink }       from "apollo-link-http"
 import { onError }        from "apollo-link-error"
 import { InMemoryCache }  from "apollo-cache-inmemory"
 import CrossFetch         from "cross-fetch"
+import { OSet }           from "oset"
+import Chunking           from "chunking"
 
 /*  internal dependencies  */
 import Query              from "./graphql-io-2-query"
@@ -55,6 +57,7 @@ export default class Client extends StdAPI {
             encoding:    [ "/^(?:cbor|msgpack|json)$/", "json" ],
             compress:    [ "boolean", false ],
             typenames:   [ "boolean", false ],
+            throttle:    [ "number", 250 ],
             debug:       [ "number", 0 ]
         })
 
@@ -183,10 +186,18 @@ export default class Client extends StdAPI {
 
         /*  react on subscription messages  */
         if (this.$.mode === "websocket") {
-            this._.graphqlLinkNet.on("receive", ({ type, data }) => {
-                if (type === "GRAPHQL-NOTIFY" && Ducky.validate(data, "[ string* ]")) {
-                    this.debug(1, `GraphQL notification for subscriptions: ${data.join(", ")}`)
-                    data.forEach((sid) => {
+            let onNotify = new Chunking({
+                reset: (ctx) => {
+                    ctx.sids = new OSet()
+                },
+                absorb: (ctx, args) => {
+                    let sids = args[0]
+                    sids.forEach((sid) => ctx.sids.add(sid))
+                },
+                emit: (ctx) => {
+                    /*  received notification message about outdated subscriptions  */
+                    let sids = ctx.sids.values()
+                    sids.forEach((sid) => {
                         if (this._.subscriptions[sid] !== undefined) {
                             this.debug(2, `refetch query of subscription ${sid} ` +
                                 `(instances: ${Object.keys(this._.subscriptions[sid]).length})`)
@@ -195,6 +206,13 @@ export default class Client extends StdAPI {
                             })
                         }
                     })
+                },
+                delay: this.$.throttle
+            })
+            this._.graphqlLinkNet.on("receive", ({ type, data }) => {
+                if (type === "GRAPHQL-NOTIFY" && Ducky.validate(data, "[ string* ]")) {
+                    this.debug(1, `GraphQL notification for subscriptions: ${data.join(", ")}`)
+                    onNotify(data)
                 }
             })
         }
