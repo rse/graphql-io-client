@@ -20,10 +20,10 @@
     "browserify-shim": {
     },
     "dependencies": {
-        "stdapi":                         "1.0.3",
+        "stdapi":                         "1.0.4",
         "graphql-tag":                    "2.9.2",
         "apollo-client":                  "2.3.1",
-        "apollo-client-ws":               "2.1.10",
+        "apollo-client-ws":               "2.1.11",
         "apollo-link":                    "1.2.2",
         "apollo-link-http":               "1.5.4",
         "apollo-link-error":              "1.0.9",
@@ -34,8 +34,8 @@
         "pure-uuid":                      "1.5.2",
         "ducky":                          "2.6.7",
         "clone":                          "2.1.1",
-        "oset":                           "2.0.7",
-        "chunking":                       "0.9.5"
+        "oset":                           "2.0.8",
+        "chunking":                       "1.0.0"
     },
     "devDependencies": {
         "grunt":                          "1.0.2",
