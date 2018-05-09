@@ -44,6 +44,7 @@ export default class Subscription {
         this._.iid         = (new UUID(1)).format()
         this._.sid         = ""
         this._.next        = Promise.resolve()
+        this._.refetching  = false
     }
 
     /*  check status  */
@@ -53,6 +54,13 @@ export default class Subscription {
 
     /*  force refetching of subscription  */
     refetch () {
+        /*  skip the refetch if it is already queued in the next promise chain  */
+        if (this._.refetching)
+            return this._.next
+
+        /*  remember the refetching state to avoid multiple refetches  */
+        this._.refetching = true
+
         return (this._.next = this._.next.then(() => {
             if (   this._.state !== "subscribed"
                 && (   !this._.query._.api._.subscriptions[this._.sid]
@@ -89,6 +97,9 @@ export default class Subscription {
                 void this._.query.__processResults(result, this._.onResult,
                     ` <sid: ${this._.sid !== "" ? this._.sid : "none"}>`)
                 return true
+            }).finally(() => {
+                /*  forget the refetching state to enable refetches again  */
+                this._.refetching = false
             })
         }))
     }
