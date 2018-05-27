@@ -186,7 +186,7 @@ export default class Client extends StdAPI {
 
         /*  react on subscription messages  */
         if (this.$.mode === "websocket") {
-            let onNotify = new Chunking({
+            let onNotify = Chunking({
                 reset: (ctx) => {
                     ctx.sids = new OSet()
                 },
