@@ -34,8 +34,8 @@
         "pure-uuid":                      "1.5.2",
         "ducky":                          "2.6.8",
         "clone":                          "2.1.1",
-        "oset":                           "2.0.8",
-        "chunking":                       "1.0.0"
+        "oset":                           "2.0.9",
+        "chunking":                       "1.0.2"
     },
     "devDependencies": {
         "grunt":                          "1.0.2",
@@ -64,7 +64,7 @@
         "eslint":                         "4.19.1",
         "eslint-config-standard":         "11.0.0",
         "eslint-plugin-standard":         "3.1.0",
-        "eslint-plugin-promise":          "3.7.0",
+        "eslint-plugin-promise":          "3.8.0",
         "eslint-plugin-import":           "2.12.0",
         "eslint-plugin-node":             "6.0.1"
     },
