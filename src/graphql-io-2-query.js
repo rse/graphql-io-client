@@ -155,18 +155,11 @@ export default class Query {
             anyErrors = false
         }
 
-        /*  cleanup result from Apollo Client symbol '[Symbol(id)]: "ROOT_QUERY"'  */
-        if (result.data !== null
-            && typeof Object.getOwnPropertySymbols === "function"
-            && typeof Object.getOwnPropertyDescriptor === "function") {
+        /*  cleanup result from top-level Apollo Client symbols  */
+        if (result.data !== null && typeof Object.getOwnPropertySymbols === "function") {
             let symbols = Object.getOwnPropertySymbols(result.data)
-            for (let i = 0; i < symbols.length; i++) {
-                let desc = Object.getOwnPropertyDescriptor(result.data, symbols[i])
-                if (desc.value === "ROOT_QUERY") {
-                    delete result.data[symbols[i]]
-                    break
-                }
-            }
+            for (let i = 0; i < symbols.length; i++)
+                delete result.data[symbols[i]]
         }
 
         /*  process results only if there is (still) any data and/or errors  */
