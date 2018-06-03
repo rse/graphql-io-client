@@ -155,11 +155,17 @@ export default class Query {
             anyErrors = false
         }
 
-        /*  cleanup result from top-level Apollo Client symbols  */
+        /*  cleanup result data from Apollo Client's injected symbols  */
         if (result.data !== null && typeof Object.getOwnPropertySymbols === "function") {
-            let symbols = Object.getOwnPropertySymbols(result.data)
-            for (let i = 0; i < symbols.length; i++)
-                delete result.data[symbols[i]]
+            const traverse = (obj) => {
+                if (typeof obj === "object" && obj !== null) {
+                    let symbols = Object.getOwnPropertySymbols(obj)
+                    symbols.forEach((symbol) => { delete obj[symbol] })
+                    let properties = Object.keys(obj)
+                    properties.forEach((property) => { traverse(obj[property]) })
+                }
+            }
+            traverse(result.data)
         }
 
         /*  process results only if there is (still) any data and/or errors  */
