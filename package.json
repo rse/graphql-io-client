@@ -26,7 +26,7 @@
         "apollo-client-ws":               "2.1.13",
         "apollo-link":                    "1.2.2",
         "apollo-link-http":               "1.5.4",
-        "apollo-link-error":              "1.0.9",
+        "apollo-link-error":              "1.1.0",
         "apollo-cache-inmemory":          "1.2.2",
         "cross-fetch":                    "2.2.1",
         "axios":                          "0.18.0",
@@ -38,7 +38,7 @@
         "chunking":                       "1.0.3"
     },
     "devDependencies": {
-        "grunt":                          "1.0.2",
+        "grunt":                          "1.0.3",
         "grunt-cli":                      "1.2.0",
         "grunt-contrib-jshint":           "1.1.0",
         "grunt-contrib-clean":            "1.1.0",
