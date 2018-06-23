@@ -20,7 +20,7 @@
     "browserify-shim": {
     },
     "dependencies": {
-        "stdapi":                         "1.0.5",
+        "stdapi":                         "1.0.6",
         "graphql-tag":                    "2.9.2",
         "apollo-client":                  "2.3.5",
         "apollo-client-ws":               "2.1.13",
@@ -32,9 +32,9 @@
         "axios":                          "0.18.0",
         "es6-promise":                    "4.2.4",
         "pure-uuid":                      "1.5.2",
-        "ducky":                          "2.6.10",
+        "ducky":                          "2.6.11",
         "clone":                          "2.1.1",
-        "oset":                           "2.0.9",
+        "oset":                           "2.0.10",
         "chunking":                       "1.0.3"
     },
     "devDependencies": {
@@ -42,7 +42,7 @@
         "grunt-cli":                      "1.2.0",
         "grunt-contrib-jshint":           "1.1.0",
         "grunt-contrib-clean":            "1.1.0",
-        "grunt-eslint":                   "20.2.0",
+        "grunt-eslint":                   "21.0.0",
         "grunt-browserify":               "5.3.0",
         "grunt-babel":                    "7.0.0",
         "grunt-tslint":                   "5.0.2",
@@ -60,8 +60,8 @@
         "browserify-header":              "0.9.4",
         "browserify-derequire":           "0.9.6",
         "browserify-shim":                "3.8.14",
-        "babel-eslint":                   "8.2.3",
-        "eslint":                         "4.19.1",
+        "babel-eslint":                   "8.2.5",
+        "eslint":                         "5.0.0",
         "eslint-config-standard":         "11.0.0",
         "eslint-plugin-standard":         "3.1.0",
         "eslint-plugin-promise":          "3.8.0",
