@@ -30,38 +30,42 @@ declare module "graphql-io-client" {
     class Client {
         /*  Construct a new GraphQL-IO Client instance.  */
         public constructor(options?: {
+            /*  The prefix of for the used HTTP Cookies.
+                The default is `GraphQL-IO-`.  */
+            prefix: string
+
             /*  The base URL of the server.
                 Has to match the regex `^https?:\/\/.+?:\d+$`.
                 The default is `"http://127.0.0.1:8080"`.  */
-            url: string,
+            url: string
 
             /*  The URL path specification.  */
             path: {
                 /*  The relative URL path to the login service of the server.
                     Has to match the regex `^\\/.+$`.
                     The default is `/api/auth/login`.  */
-                login: string,
+                login: string
 
                 /*  The relative URL path to the session service of the server.
                     Has to match the regex `^\\/.+$`.
                     The default is `/api/auth/session`.  */
-                session: string,
+                session: string
 
                 /*  The relative URL path to the logout service of the server.
                     Has to match the regex `^\\/.+$`.
                     The default is `/api/auth/logout`.  */
-                logout: string,
+                logout: string
 
                 /*  The relative URL path to the GraphQL service of the server.
                     Has to match the regex `^\\/.+$`.
                     The default is `/api/data/graph`.  */
-                graph: string,
+                graph: string
 
                 /*  The relative URL path to the BLOB service of the server.
                     Has to match the regex `^\\/.+$`.
                     The default is `/api/data/blob`.  */
                 blob: string
-            },
+            }
 
             /*  The communication mode for the GraphQL requests.
                 Has to be either `http` (maximum portability, no subscription support)
@@ -74,6 +78,20 @@ declare module "graphql-io-client" {
                 `msgpack` (maximum performance, binary) or `json` (less performance, text, human readable).
                 The default is `cbor`.  */
             encoding: string
+
+            /*  Whether to enable GraphQL query compression.
+                The default is `false`.  */
+            compress: boolean
+
+            /*  Whether to add GraphQL `__typename` fields to the results.
+                The default is `false`.  */
+            typenames: boolean
+
+            /*  The number of milliseconds the processing of incoming GraphQL Notifications
+                over WebSockets is delayed in order to not unnecessarily react multiple times
+                to the same GraphQL Notification within a too short time range.
+                The default is `250`.  */
+            throttle: number
 
             /*  The debugging level.
                 Has to be an integer between 0 (no debugging) and 3 (maximum debugging messages).
@@ -184,12 +202,13 @@ declare module "graphql-io-client" {
     interface Result {
         data: object,
         errors?: Array<{
-            message: string;
+            message: string
             locations?: Array<{
-                line: number;
-                column: number;
-            }>;
-            [ name: string ]: any;
+                line: number
+                column: number
+            }>
+            path?: string[]
+            [ name: string ]: any
         }>
     }
 
