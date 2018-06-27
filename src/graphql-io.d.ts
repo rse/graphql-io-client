@@ -153,16 +153,19 @@ declare module "graphql-io-client" {
         Set `errorsPass` and `dataStrict` both to `true` for ensuring that the callback in methods
         `then()` and `subscribe()` are either called with a `data` field or not at all.  */
     interface Options {
-        /*  Enable/disable the emitting of GraphQL errors via `error` event (default `true`).  */
+        /*  Enable/disable the emitting of GraphQL errors via `error` event (default `true`).
+            By disabling this, the errors are not longer emitted at all.  */
         errorsEmit?: boolean
 
-        /*  Enable/disable passing errors via the GraphQL result `errors` field (default `true`).  */
+        /*  Enable/disable passing errors via the GraphQL result `errors` field (default `true`).
+            By disabling this, the errors in GraphQL results are silently discarded.  */
         errorsPass?: boolean
 
         /*  Enable/disable causing the `data` field to be `null` in case of any errors (default `false`).  */
         dataStrict?: boolean
 
-        /*  DuckaJS specification for validating the GraphQL result field `data` (default `null`).  */
+        /*  DuckyJS specification for validating the GraphQL result field `data` (default `null`).
+            DuckyJS validation errors are appended to existing errors in the result.  */
         dataRequire?: string
     }
 
