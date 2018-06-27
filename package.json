@@ -23,7 +23,7 @@
         "stdapi":                         "1.0.6",
         "graphql-tag":                    "2.9.2",
         "apollo-client":                  "2.3.5",
-        "apollo-client-ws":               "2.1.14",
+        "apollo-client-ws":               "2.1.15",
         "apollo-link":                    "1.2.2",
         "apollo-link-http":               "1.5.4",
         "apollo-link-error":              "1.1.0",
