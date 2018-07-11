@@ -278,7 +278,8 @@ export default class Client extends StdAPI {
                 this._.peer  = response.data.peer
             }
 
-            /*  for WebSocket connections, force a re-establishment  */
+            /*  for WebSocket connections, force a re-establishment
+                as the server has to be forced to authenticate us again  */
             if (this.$.mode === "websocket") {
                 await this._.graphqlLinkNet.disconnect()
                 await this._.graphqlLinkNet.connect()
