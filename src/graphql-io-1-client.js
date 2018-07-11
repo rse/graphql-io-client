@@ -224,7 +224,7 @@ export default class Client extends StdAPI {
                     this.debug(2, `refetch query of subscription ${sid} ` +
                         `(instances: ${Object.keys(this._.subscriptions[sid]).length})`)
                     Object.keys(this._.subscriptions[sid]).forEach((iid) => {
-                        this._.subscriptions[sid][iid].refetch()
+                        this._.subscriptions[sid][iid].refetch(true)
                     })
                 })
             })

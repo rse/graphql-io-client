@@ -53,7 +53,7 @@ export default class Subscription {
     }
 
     /*  force refetching of subscription  */
-    refetch () {
+    refetch (force = false) {
         /*  skip the refetch if it is already queued in the next promise chain  */
         if (this._.refetching)
             return this._.next
@@ -62,7 +62,8 @@ export default class Subscription {
         this._.refetching = true
 
         return (this._.next = this._.next.then(() => {
-            if (   this._.state !== "subscribed"
+            if (   !force
+                && this._.state !== "subscribed"
                 && (   !this._.query._.api._.subscriptions[this._.sid]
                     || !this._.query._.api._.subscriptions[this._.sid][this._.iid]))
                 return
