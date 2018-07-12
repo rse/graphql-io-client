@@ -238,7 +238,7 @@ export default class Query {
             `query: ${JSON.stringify(this._.query)}, ` +
             `variables: ${JSON.stringify(this._.vars)}`)
         let subscription = new Subscription(this, onResult)
-        subscription.refetch()
+        subscription.refetch(true)
         return subscription
     }
 }
