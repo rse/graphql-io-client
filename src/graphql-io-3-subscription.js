@@ -62,10 +62,10 @@ export default class Subscription {
         this._.refetching = true
 
         return (this._.next = this._.next.then(() => {
-            /*  stop processing if...
+            /*  stop processing our perhaps still queued refetch operation, if...
                 - we are not forced to refetch (on disconnect/connect cycles) and
-                - the state is not "subscribed" and
-                - this subscription is not already stored  */
+                - the state is (again) not "subscribed" (after an unsubscribe) and
+                - this subscription is no longer stored  */
             if (   !force
                 && this._.state !== "subscribed"
                 && (   !this._.query._.api._.subscriptions[this._.sid]
