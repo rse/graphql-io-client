@@ -55,7 +55,7 @@ export default class Subscription {
     /*  force refetching of subscription  */
     refetch (force = false) {
         /*  skip the refetch if it is already queued in the next promise chain  */
-        if (this._.refetching)
+        if (!force && this._.refetching)
             return this._.next
 
         /*  remember the refetching state to avoid multiple refetches  */
