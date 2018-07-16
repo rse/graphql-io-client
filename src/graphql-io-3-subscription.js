@@ -55,8 +55,11 @@ export default class Subscription {
     /*  force refetching of subscription  */
     refetch (force = false) {
         /*  skip the refetch if it is already queued in the next promise chain  */
-        if (!force && this._.refetching)
+        if (!force && this._.refetching) {
+            this._.query._.api.debug(3, "refetching of subscribed query aborted: already in progress" +
+                ` (sid: ${this._.sid !== "" ? this._.sid : "<none>"}, iid: ${this._.iid})`)
             return this._.next
+        }
 
         /*  remember the refetching state to avoid multiple refetches  */
         this._.refetching = true
@@ -69,8 +72,11 @@ export default class Subscription {
             if (   !force
                 && this._.state !== "subscribed"
                 && (   !this._.query._.api._.subscriptions[this._.sid]
-                    || !this._.query._.api._.subscriptions[this._.sid][this._.iid]))
+                    || !this._.query._.api._.subscriptions[this._.sid][this._.iid])) {
+                this._.query._.api.debug(3, `refetching of subscribed query aborted: already in state ${this._.state}` +
+                    ` (sid: ${this._.sid !== "" ? this._.sid : "<none>"}, iid: ${this._.iid})`)
                 return
+            }
             if (this._.state !== "subscribed")
                 throw new Error(`query not active (currently in "${this._.state}" state)`)
             let args = this._.query.__assembleArgs()
