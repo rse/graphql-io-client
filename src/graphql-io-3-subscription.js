@@ -52,6 +52,12 @@ export default class Subscription {
         return this._.state
     }
 
+    /*  reset status  */
+    reset () {
+        this._.next = Promise.resolve()
+        return this
+    }
+
     /*  force refetching of subscription  */
     refetch (force = false) {
         /*  skip the refetch if it is already queued in the next promise chain  */
@@ -64,6 +70,7 @@ export default class Subscription {
         /*  remember the refetching state to avoid multiple refetches  */
         this._.refetching = true
 
+        /*  append operation to promise chain  */
         return (this._.next = this._.next.then(() => {
             /*  stop processing our perhaps still queued refetch operation, if...
                 - we are not forced to refetch (on disconnect/connect cycles) and
