@@ -60,16 +60,15 @@ module.exports = function (grunt) {
                         } ],
                         [ "babelify", {
                             presets: [
-                                [ "env", {
+                                [ "@babel/preset-env", {
                                     "targets": {
-                                        "browser": [ "last 2 versions" ]
+                                        "browsers": "last 2 versions, > 1%, ie 11"
                                     }
-                                } ],
-                                "stage-3",
-                                "stage-2"
+                                } ]
                             ],
-                            plugins: [ [ "transform-runtime", {
-                                "polyfill":    true,
+                            plugins: [ [ "@babel/plugin-transform-runtime", {
+                                "corejs":      2,
+                                "helpers":     true,
                                 "regenerator": true
                             } ] ]
                         } ],
@@ -100,20 +99,17 @@ module.exports = function (grunt) {
                 options: {
                     sourceMap: false,
                     presets: [
-                        [ "env", {
+                        [ "@babel/preset-env", {
                             "targets": {
-                                "node": "6.0"
+                                "node": "8.0.0"
                             }
-                        } ],
-                        "stage-3",
-                        "stage-2"
+                        } ]
                     ],
                     plugins: [
-                        [ "transform-runtime", {
+                        [ "@babel/plugin-transform-runtime", {
+                            "corejs":      2,
                             "helpers":     true,
-                            "polyfill":    true,
-                            "regenerator": false,
-                            "moduleName": "babel-runtime"
+                            "regenerator": false
                         } ]
                     ]
                 }
