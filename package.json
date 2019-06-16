@@ -20,7 +20,7 @@
     "browserify-shim": {
     },
     "dependencies": {
-        "stdapi":                          "1.1.1",
+        "stdapi":                          "1.1.2",
         "graphql":                         "14.3.1",
         "graphql-tag":                     "2.10.1",
         "apollo-client":                   "2.6.2",
@@ -33,9 +33,9 @@
         "axios":                           "0.19.0",
         "es6-promise":                     "4.2.8",
         "pure-uuid":                       "1.5.7",
-        "ducky":                           "2.7.0",
+        "ducky":                           "2.7.1",
         "clone":                           "2.1.2",
-        "oset":                            "2.1.0",
+        "oset":                            "2.1.1",
         "chunking":                        "1.0.6",
         "@babel/runtime-corejs2":          "7.4.5"
     },
@@ -57,8 +57,8 @@
         "@babel/preset-env":               "7.4.5",
         "@babel/plugin-transform-runtime": "7.4.4",
         "uglifyify":                       "5.0.1",
-        "browserify-header":               "1.0.0",
-        "browserify-derequire":            "1.0.0",
+        "browserify-header":               "1.0.1",
+        "browserify-derequire":            "1.0.1",
         "browserify-shim":                 "3.8.14",
         "babel-eslint":                    "10.0.1",
         "eslint":                          "5.16.0",
