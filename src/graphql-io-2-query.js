@@ -65,7 +65,7 @@ export default class Query {
         this._.opts  = opts
 
         /*  determine and sanity check GraphQL operation type  */
-        let m = this._.query.match(/^\s*(query|mutation|subscription)\b/)
+        const m = this._.query.match(/^\s*(query|mutation|subscription)\b/)
         if (m !== null) {
             /*  explicit GraphQL operation given in query  */
             if (m[1] === "subscription")
@@ -102,7 +102,7 @@ export default class Query {
     /*  assemble Apollo Client query/mutation arguments  */
     __assembleArgs (opts = {}) {
         /*  determine type of operation  */
-        let kind = this._.type === "mutation" ? "mutation" : "query"
+        const kind = this._.type === "mutation" ? "mutation" : "query"
 
         /*  assemble arguments  */
         return Object.assign({}, {
@@ -121,7 +121,7 @@ export default class Query {
 
         /*  optionally perform data structure validation  */
         if (this._.opts.dataRequire !== null) {
-            let errors = []
+            const errors = []
             if (!Ducky.validate.execute(result.data, this._.opts.dataRequire, errors)) {
                 if (!anyErrors) {
                     result.errors = []
@@ -159,9 +159,9 @@ export default class Query {
         if (result.data !== null && typeof Object.getOwnPropertySymbols === "function") {
             const traverse = (obj) => {
                 if (typeof obj === "object" && obj !== null) {
-                    let symbols = Object.getOwnPropertySymbols(obj)
+                    const symbols = Object.getOwnPropertySymbols(obj)
                     symbols.forEach((symbol) => { delete obj[symbol] })
-                    let properties = Object.keys(obj)
+                    const properties = Object.keys(obj)
                     properties.forEach((property) => { traverse(obj[property]) })
                 }
             }
@@ -184,7 +184,7 @@ export default class Query {
             throw new Error("you have to supply a result function")
 
         /*  compile GraphQL query  */
-        let err = this.__compileAST()
+        const err = this.__compileAST()
         if (err !== null) {
             this._.error(err)
             return new Promise((resolve /* , reject */) => {
@@ -193,11 +193,11 @@ export default class Query {
         }
 
         /*  create a request with the underlying Apollo Client query/mutate method  */
-        let method = (this._.type === "query" ? "query" : "mutate")
+        const method = (this._.type === "query" ? "query" : "mutate")
         this._.api.debug(1, `GraphQL request (${method}): ` +
             `query: ${JSON.stringify(this._.query)}, ` +
             `variables: ${JSON.stringify(this._.vars)}`)
-        let args = this.__assembleArgs()
+        const args = this.__assembleArgs()
         let promise = this._.api._.graphqlClient[method](args)
 
         /*  post-process the result  */
@@ -226,7 +226,7 @@ export default class Query {
             "$1 _Subscription { subscribe } ")
 
         /*  compile GraphQL query  */
-        let err = this.__compileAST()
+        const err = this.__compileAST()
         if (err !== null) {
             this._.error(err)
             onResult({ data: null, errors: [ err ] })
@@ -237,7 +237,7 @@ export default class Query {
         this._.api.debug(1, "GraphQL request (query): " +
             `query: ${JSON.stringify(this._.query)}, ` +
             `variables: ${JSON.stringify(this._.vars)}`)
-        let subscription = new Subscription(this, onResult)
+        const subscription = new Subscription(this, onResult)
         subscription.refetch(true)
         return subscription
     }

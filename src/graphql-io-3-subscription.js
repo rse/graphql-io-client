@@ -86,8 +86,8 @@ export default class Subscription {
             }
             if (this._.state !== "subscribed")
                 throw new Error(`query not active (currently in "${this._.state}" state)`)
-            let args = this._.query.__assembleArgs()
-            let promise = this._.query._.api._.graphqlClient.query(args)
+            const args = this._.query.__assembleArgs()
+            const promise = this._.query._.api._.graphqlClient.query(args)
             return promise.then((result) => {
                 /*  clone data structure  */
                 result = clone(result, false)

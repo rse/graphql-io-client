@@ -187,7 +187,7 @@ export default class Client extends StdAPI {
 
         /*  react on subscription messages  */
         if (this.$.mode === "websocket") {
-            let onNotify = Chunking({
+            const onNotify = Chunking({
                 reset: (ctx) => {
                     ctx.sids = new OSet()
                 },
@@ -196,7 +196,7 @@ export default class Client extends StdAPI {
                 },
                 emit: (ctx) => {
                     /*  received notification message about outdated subscriptions  */
-                    let sids = ctx.sids.values()
+                    const sids = ctx.sids.values()
                     sids.forEach((sid) => {
                         if (this._.subscriptions[sid] !== undefined) {
                             this.debug(2, `refetch query of subscription ${sid} ` +
@@ -259,7 +259,7 @@ export default class Client extends StdAPI {
 
         /*  determine credentials  */
         if (!implicit) {
-            let { username, password } = await this.hook("login-credentials", "pass",
+            const { username, password } = await this.hook("login-credentials", "pass",
                 { username: this._.loginUsername, password: this._.loginPassword })
             this._.loginUsername = username
             this._.loginPassword = password
@@ -321,7 +321,7 @@ export default class Client extends StdAPI {
     /*  query (internal API)  */
     _graphql (type, query, vars = {}, opts = {}) {
         /*  sanity check options  */
-        let err = []
+        const err = []
         if (!Ducky.validate(opts, `{
             errorsEmit?: boolean,
             errorsPass?: boolean,
