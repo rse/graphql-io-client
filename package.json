@@ -30,7 +30,7 @@
         "apollo-link-error":               "1.1.12",
         "apollo-cache-inmemory":           "1.6.5",
         "cross-fetch":                     "3.0.4",
-        "axios":                           "0.19.0",
+        "axios":                           "1.6.0",
         "es6-promise":                     "4.2.8",
         "pure-uuid":                       "1.5.8",
         "ducky":                           "2.7.2",
